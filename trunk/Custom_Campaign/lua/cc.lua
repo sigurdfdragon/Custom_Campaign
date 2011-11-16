@@ -1608,14 +1608,13 @@ end
 
 ----------------- ARMY INFORMATION ----------------------
 
--- TODO: Change info to match new mulit-leader 
-
 function cc.army_info(index)
 	wml_actions.message({ speaker="narrator", message=_"Information about Armies" ..
 		"\n \n" .. _"Each army has a Main Leader. This is the leader whose picture appears for the army entry. " ..
-		_"If you lose your Primary Leader, you are defeated." ..
 		"\n \n" .. _"Under Edit Troops, you can add Heroes, Leaders, and Expendable Leaders. " ..
-		_"If you lose a Hero or Leader, you are defeated." ..
+		_"If you lose a Hero or Leader, you are defeated. " ..
+		_"If your Main Leader is an Expendable Leader and dies, Main Leader status will be reassigned to another Expendable Leader if possible, or a Leader. " ..
+		_"If you have no more leaders left, your are defeated."
 		"\n \n" .. _"When you play a scenario, the objectives will list the names of the units whose deaths will cause a loss." ..
 		"\n \n" .. _"Starting Recall lets you set how many troops are recalled at the start of the battle. " ..
 		_"If you pick a number, the troops are prioritized by loyal, then level, then % XP toward level-up. " ..
