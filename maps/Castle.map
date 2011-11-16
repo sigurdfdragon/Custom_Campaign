@@ -1,0 +1,14 @@
+border_size=1
+usage=map
+
+Ww          , Ww          , Ww          , Ww          , Ww          , Ww          , Ww          , Ww          , Ww          , Ww          , Ww          , Ww          , Ww          , Ww          , Ww          , Ww          , Ww          , Ww          , Ww          
+Ww          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ww          
+Ww          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ww          
+Ww          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ww          
+Ww          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Kh          , Kh          , Kh          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ww          
+Ww          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Kh          , 1 Kh        , Kh          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ww          
+Ww          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Kh          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ww          
+Ww          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ww          
+Ww          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ww          
+Ww          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ch          , Ww          
+Ww          , Ww          , Ww          , Ww          , Ww          , Ww          , Ww          , Ww          , Ww^Bw|      , Ww^Bw|      , Ww^Bw|      , Ww          , Ww          , Ww          , Ww          , Ww          , Ww          , Ww          , Ww          
