@@ -463,8 +463,9 @@ function cc.leader_display_list(index)
 			i = i + 1
 			-- assemble the [message] entry
 			t[i] = "&" .. d.image .. "~RC(magenta>red)=" .. d.leader_name .. ", " .. d.language_name ..
-			 "\n<small><small>" .. d.role .. 
-			 "\n" .. _"Extra Recruit: " .. d.extra_recruit .. "</small></small>="
+			 "\n<small><small>" .. d.role .. --[[
+			 "\n" .. _"Extra Recruit: " .. d.extra_recruit ..
+			 "\n" .. _"Filter Recall: " .. d.filter_recall .. --]] "</small></small>="
 		else
 			break -- we are out of leaders
 		end
