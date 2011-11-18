@@ -700,9 +700,9 @@ function cc.era_die()
 	-- 1. Check if a Leader or Hero has died. If so, end the level in defeat.
 	   -- a. Filter for role="Leader,Hero"
 	   -- b. End the level.
-	u = wesnoth.get_variable("unit")
+	local u = wesnoth.get_variable("unit")
 	if u.role == "Leader" or u.role == "Hero" then
-		return wml_actions.endlevel({ result="defeat" })
+		wml_actions.endlevel({ result="defeat" })
 	end
 	-- 2. If an Expendable Leader that is the Main Leader has died, try to reassign Main Leader status to
 	   -- first to another Expendable Leader, second to a Leader. (just get the first one that matches the filter
@@ -1244,7 +1244,7 @@ function cc.edit_recruit(caller, index, entry)
 		end
 	else
 		-- army leader - check for missing unit as well
-		local u = helper.get_child(army[i], "troop_list", "Main Leader")
+		local u = helper.get_child(entry, "troop_list", "Main Leader")
 		if wesnoth.unit_types[u.type] then
 			wesnoth.put_unit(loc[1], loc[2], u)
 		else
