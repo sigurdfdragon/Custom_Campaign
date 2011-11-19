@@ -298,12 +298,30 @@ function cc.recruit_translate(rl)
 				t[i] = "----------"
 			end
 		end
+		table.sort(t)
 		return table.concat(t, ",")
 	else -- list is empty
 		return ""
 	end
 end
 
+function cc.race_translate(rl)
+	if rl ~= nil and rl ~= "" then
+		local t = cc.split(rl, ",")
+		for i,v in ipairs(t) do
+			if wesnoth.races[v] ~= nil then
+				t[i] = tostring(wesnoth.races[v].plural_name)
+			else
+				t[i] = "----------"
+			end
+		end
+		table.sort(t)
+		return table.concat(t, ",")
+	else -- list is empty
+		return ""
+	end
+end
+		
 function cc.remove_missing_recruits(recruit)
 	-- recieves a recruit list, returns a recruit list
 	if recruit ~= nil and recruit ~= "" then
@@ -463,10 +481,12 @@ function cc.leader_display_list(index)
 			
 			for i = 1, #u do
 				if u[i][1] == "filter_recall" then
-					if next(u[i][2]) then
-						d.filter_recall = _"Based on leader recruit"
+					if u[i][2].type then
+						d.filter_recall = cc.recruit_translate(u[i][2].type)
+					elseif u[i][2].race then
+						d.filter_recall = cc.race_translate(u[i][2].race)
 					else
-						d.filter_recall = _"Any units"
+						d.filter_recall = _"All units"
 					end
 				end
 			end
@@ -1496,11 +1516,13 @@ function cc.edit_leader_recruit_end(leader_index, index)
 end
 
 function cc.edit_leader_filter_recall(leader_index, index, recruit)
-	local filter_recall
+	local filter_recall = {}
 	
 	local choice = cc.get_user_choice({ speaker="narrator", message=_"What units would you like this leader to be able to recall?" },
-		{ _"Recruits and what they can level up into", _"Any units" })
+		{ _"Based on leader recruit", _"Selected race", _"All units" })
 	if     choice == 1 then
+		-- Scan each recruit for advaces_to key and add any not present in the recruit list
+		-- to the end of the list
 		if recruit ~= "" then
 			units = cc.split(recruit, ",")
 			local u = 1
@@ -1524,9 +1546,34 @@ function cc.edit_leader_filter_recall(leader_index, index, recruit)
 				u = u + 1
 			end
 		end
+		table.sort(units)
 		local recallable_units = table.concat(units, ",")
-		filter_recall = { id = recallable_units }
+		filter_recall = { type = recallable_units }
 	elseif choice == 2 then
+		-- present a list of races to the player
+		local race_list = cc.find_races()
+		local race_display = { [0] = cc.end_button() }
+		for i,v in ipairs(race_list) do
+			race_display[i] = v.name .. "=" .. "(id: " .. v.id .. ")"
+		end
+		local c = 0; local choices = {}
+		repeat
+			local answer = cc.get_user_choice({ speaker="narrator", message=_"Select a race that you would like this leader to be able to recall." }, race_display, 0)
+			if answer ~= 0 then
+				c = c + 1
+				choices[c] = race_list[answer].id
+				table.remove(race_list, answer)
+				table.remove(race_display, answer)
+			end
+		-- only run the loop once, as SUF race does not take a comma seperated list.
+		-- TODO: remove limitation if race does ever accept a comma seperated list.
+		until answer == 0 or c == 1
+		if next(choices) then
+			table.sort(choices)
+			local races = table.concat(choices, ",")
+			filter_recall = { race = races }
+		end
+	elseif choice == 3 then
 		filter_recall = {}
 	end
 	
@@ -2467,8 +2514,8 @@ function cc.find_moves(unit_types)
 end
 
 function cc.find_races()
-	-- Returns an array of races with plural_name and id
-	-- sorted by plural_name
+	-- Returns an array of races with name and id
+	-- sorted by name
 	local races = {}
 	local i = 1
 	for k,v in pairs(wesnoth.races) do
