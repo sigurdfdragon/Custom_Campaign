@@ -460,12 +460,23 @@ function cc.leader_display_list(index)
 			elseif u.role == "Expendable Leader" then
 				d.role = _"Expendable Leader"
 			end
+			
+			for i = 1, #u do
+				if u[i][1] == "filter_recall" then
+					if next(u[i][2]) then
+						d.filter_recall = _"Based on leader recruit"
+					else
+						d.filter_recall = _"Any units"
+					end
+				end
+			end
+			
 			i = i + 1
 			-- assemble the [message] entry
 			t[i] = "&" .. d.image .. "~RC(magenta>red)=" .. d.leader_name .. ", " .. d.language_name ..
 			 "\n<small><small>" .. d.role ..
-			 "\n" .. _"Extra Recruit: " .. d.extra_recruit .. --[[
-			 "\n" .. _"Filter Recall: " .. d.filter_recall .. --]] "</small></small>="
+			 "\n" .. _"Extra Recruit: " .. d.extra_recruit ..
+			 "\n" .. _"Filter Recall: " .. d.filter_recall .. "</small></small>="
 		else
 			break -- we are out of leaders
 		end
@@ -1468,6 +1479,7 @@ function cc.edit_leader_recruit_end(leader_index, index)
 		
 		-- end
 		army[index][leader_index][2].extra_recruit = recruit
+		cc.edit_leader_filter_recall(leader_index, index, recruit)
 		return cc.army_options(index)
 	elseif choice == 2 then
 		-- cleanup
@@ -1482,6 +1494,51 @@ function cc.edit_leader_recruit_end(leader_index, index)
 		-- Fall out of function back to player control
 	end
 end
+
+function cc.edit_leader_filter_recall(leader_index, index, recruit)
+	local filter_recall
+	
+	local choice = cc.get_user_choice({ speaker="narrator", message=_"What units would you like this leader to be able to recall?" },
+		{ _"Recruits and what they can level up into", _"Any units" })
+	if     choice == 1 then
+		if recruit ~= "" then
+			units = cc.split(recruit, ",")
+			local u = 1
+			while units[u] do
+				if wesnoth.unit_types[units[u]].__cfg.advances_to ~= "null" and wesnoth.unit_types[units[u]].__cfg.advances_to then
+					local advances = cc.split(wesnoth.unit_types[units[u]].__cfg.advances_to, ",")
+					local a = 1
+					while advances[a] do
+						local is_present = false
+						for i = 1, #units do
+							if advances[a] == units[i] then
+								is_present = true; break
+							end
+						end
+						if is_present == false then
+							table.insert(units, advances[a])
+						end
+						a = a + 1
+					end
+				end
+				u = u + 1
+			end
+		end
+		local recallable_units = table.concat(units, ",")
+		filter_recall = { id = recallable_units }
+	elseif choice == 2 then
+		filter_recall = {}
+	end
+	
+	for i = 1, #army[index][leader_index][2] do
+		if army[index][leader_index][2][i][1] == "filter_recall" then
+			army[index][leader_index][2][i][2] = filter_recall
+		end
+	end
+end
+	-- when done creating a recruit list, create a filter recall to match
+	-- (scan unit_types and derive all possible advancement from them.)
+	
 
 ---------------------- EDIT RECRUITMENT PATTERN -----------------
 
