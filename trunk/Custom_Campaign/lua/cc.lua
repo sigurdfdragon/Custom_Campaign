@@ -463,8 +463,8 @@ function cc.leader_display_list(index)
 			i = i + 1
 			-- assemble the [message] entry
 			t[i] = "&" .. d.image .. "~RC(magenta>red)=" .. d.leader_name .. ", " .. d.language_name ..
-			 "\n<small><small>" .. d.role .. --[[
-			 "\n" .. _"Extra Recruit: " .. d.extra_recruit ..
+			 "\n<small><small>" .. d.role ..
+			 "\n" .. _"Extra Recruit: " .. d.extra_recruit .. --[[
 			 "\n" .. _"Filter Recall: " .. d.filter_recall .. --]] "</small></small>="
 		else
 			break -- we are out of leaders
@@ -875,7 +875,7 @@ function cc.army_options(index)
 	repeat
 		answer = cc.get_user_choice({ speaker="narrator", message="" },
 			{ [0]=msg[index], cc.back_button(), _"View Army", _"Rename Army", _"Change Main Leader", _"Edit Troops",
-			_"Edit Starting Recall", _"Edit Recruit", _"Edit Recruitment Pattern", _"Information", _"Delete Army" }, 0)
+			_"Edit Starting Recall", _"Edit Recruit", _"Edit Leader Recruit", _"Edit Recruitment Pattern", _"Information", _"Delete Army" }, 0)
 	until  answer ~= 0
 	if     answer == 1 then return cc.army_list()
 	elseif answer == 2 then return cc.view_entry(army[index], "army", index)
@@ -884,9 +884,10 @@ function cc.army_options(index)
 	elseif answer == 5 then return cc.edit_troops(index)
 	elseif answer == 6 then return cc.edit_starting_recall(index)
 	elseif answer == 7 then return cc.edit_recruit("edit_army", index, army[index])
-	elseif answer == 8 then return cc.edit_recruitment_pattern("edit_army", index, army[index])
-	elseif answer == 9 then return cc.army_info(index)
-	elseif answer == 10 then return cc.delete_entry("edit_army", index)
+	elseif answer == 8 then return cc.edit_leader_recruit("unused_param", index, army[index])
+	elseif answer == 9 then return cc.edit_recruitment_pattern("edit_army", index, army[index])
+	elseif answer == 10 then return cc.army_info(index)
+	elseif answer == 11 then return cc.delete_entry("edit_army", index)
 	end
 end
 
@@ -1357,6 +1358,131 @@ function cc.edit_recruit_end(caller, index)
 	end
 end
 
+----------------- EDIT LEADER RECRUIT ----------------------------
+
+-- TODO: Now that there's multi-leader support, add edit_leader_recruit() functions
+--		 Likely to be postponded until 1.11. We'll see...
+
+-- function cc.edit_leader_recruit(index)
+	-- first make a list of the leaders from the entry to choose
+	-- which one gets it's recruit list edited
+	-- present in order of main leader, then secondaries in alphabetical by type lang name or unit name
+	
+	-- when done creating a recruit list, create a filter recall to match
+	-- (scan unit_types and derive all possible advancement from them.)
+
+-- end
+
+function cc.edit_leader_recruit(caller, index, entry)
+	-- first, let the player choose which leader's recruit to edit
+	local options = cc.leader_display_list(index); options[0] = cc.back_button()
+	local leader_index = cc.get_user_choice({ speaker="narrator", message=_"Select a leader to edit their extra recruit list." }, options, 0)
+	if leader_index == 0 then
+		return cc.army_options(index)
+	end
+
+	wml_actions.set_menu_item({ id=1, description=_"End Edit Leader Recruit",
+		{ "show_if", { } },
+		{ "command", { { "lua", { code = "cc.edit_leader_recruit_end(" .. leader_index .. ", " .. index .. ")" } } } } })
+	wml_actions.set_menu_item({ id=2, description=_"Edit Leader Recruit Instructions",
+		{ "show_if", { } },
+		{ "command", { { "message", { speaker="narrator", message=_"Use the Recruit command to select units for the Leader Recruit list. Selected units will appear on the Recall list. Use Dismiss unit to remove a unit. Use the Unit Filters to adjust what appears on the Recruit list."  } } } } })
+	wml_actions.set_menu_item({ id=3, description=_"Unit Filters",
+		{ "show_if", { } },
+		{ "command", { { "lua", { code="cc.unit_filters()" } } } } })
+	wml_actions.set_menu_item({ id=4, description=_"Add Recruits From Entry",
+		{ "show_if", { } },
+		{ "command", { { "lua", { code="cc.edit_recruit_add_from_entry()" } } } } })
+	wml_actions.set_menu_item({ id=5, description=_"Clear Selected Recruits",
+		{ "show_if", { } },
+		{ "command", { { "lua", { code=[[wml_actions.kill({ x="recall", y="recall" }) ]] } } } } })
+	
+	-- prerecruit event - prevent recruit and gold change, put recruit on recall
+	wml_actions.event({ name="prerecruit", id="recruit", first_time_only="no",
+		{ "lua", { code = "cc.edit_recruit_event_recruit()" } } })
+	-- prerecall event - prevent recall and gold change
+	wml_actions.event({ name="prerecall", id="recall", first_time_only="no",
+		{ "lua", { code = [[
+							local x,y = wesnoth.current.event_context.x1, wesnoth.current.event_context.y1
+							wesnoth.put_recall_unit(wesnoth.get_unit(x,y))
+							wml_actions.gold({ side="1", amount=wesnoth.game_config.recall_cost })
+						  ]] } } })
+		
+	-- initilize recruit list to contain all possible units
+	local unit_types = cc.get_unit_type_ids()
+	local unit_list = table.concat(unit_types, ",")
+	wml_actions.set_recruit({ side=1, recruit=unit_list })
+	
+	cc.reset_unit_filters()
+	
+	-- unpack leader to keep
+	local loc = wesnoth.get_starting_location(1)
+
+	-- unpack selected leader - check for missing unit as well
+	local u = army[index][leader_index][2]
+	if wesnoth.unit_types[u.type] then
+		wesnoth.put_unit(loc[1], loc[2], u)
+	else
+		wesnoth.put_unit(loc[1], loc[2], { type="Custom Campaign Unit", canrecruit=true, facing="se" })
+	end
+	
+	-- get proxy for leader put on map
+	u = wesnoth.get_unit(loc[1], loc[2])
+	
+	if next(u.extra_recruit) then -- ~= "" then
+		-- unpack recruit list to recall list
+		-- local recruits = cc.split(u.extra_recruit, ",")
+		local recruits = u.extra_recruit
+		
+		for i,v in ipairs(recruits) do
+			-- ---------- check, if false do not add
+			if wesnoth.unit_types[v] then
+				local u = wesnoth.create_unit({ type=v, generate_name="no", random_gender="no", random_traits="no" })
+				wesnoth.put_recall_unit(u)
+			end
+		end
+		-- clear extra_recruit from leader on map so it doesn't clutter the recruit list
+		u.extra_recruit = {}
+	end
+end
+
+function cc.edit_leader_recruit_end(leader_index, index)
+	local choice = cc.get_user_choice({ speaker="narrator", message=_"Choose option:"},
+		{ _"End and accept edits", _"End and discard edits", _"Continue editing" })
+	
+	if choice == 1 then
+		-- take recall list and make a recruit list
+		local units = wesnoth.get_recall_units({ side=1 })
+		local list = {}
+		for i,v in ipairs(units) do
+			list[i] = v.type
+		end
+		table.sort(list)
+		local recruit = table.concat(list, ",")
+
+		-- cleanup
+		cc.clear_menu_items()
+		wml_actions.event({ id="recruit", remove=true })
+		wml_actions.event({ id="recall", remove=true })
+		wml_actions.kill({ animate="no", fire_event="no" })
+		
+		-- end
+		army[index][leader_index][2].extra_recruit = recruit
+		return cc.army_options(index)
+	elseif choice == 2 then
+		-- cleanup
+		cc.clear_menu_items()
+		wml_actions.event({ id="recruit", remove=true })
+		wml_actions.event({ id="recall", remove=true })
+		wml_actions.kill({ animate="no", fire_event="no" })
+		
+		-- end
+		return cc.army_options(index)
+	elseif choice == 3 then
+		-- Fall out of function back to player control
+	end
+end
+
 ---------------------- EDIT RECRUITMENT PATTERN -----------------
 
 function cc.edit_recruitment_pattern(caller, index, entry)
@@ -1590,21 +1716,6 @@ function cc.edit_starting_recall(index)
 	local choice = cc.get_user_choice({ speaker="narrator", message=_"How many troops would you like to have automatically recalled at the start of a battle?"}, list, -1)
 	army[index].starting_recall = choice
 	return cc.army_options(index)
-end
-
------------------ EDIT LEADER RECRUIT ----------------------------
-
--- TODO: Now that there's multi-leader support, add edit_leader_recruit() functions
---		 Likely to be postponded until 1.11. We'll see...
-
-function cc.edit_leader_recruit(index)
-	-- first make a list of the leaders from the entry to choose
-	-- which one gets it's recruit list edited
-	-- present in order of main leader, then secondaries in alphabetical by type lang name or unit name
-	
-	-- when done creating a recruit list, create a filter recall to match
-	-- (scan unit_types and derive all possible advancement from them.)
-
 end
 
 ----------------- ARMY INFORMATION ----------------------
