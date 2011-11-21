@@ -536,6 +536,8 @@ function cc.scenario_prestart()
 	
 	-- create the turn refresh event
 	-- prevent turn from advancing so save list isn't cluttered & gold kept constant
+	-- done this way instead of [disable_end_turn] because we need the player to be
+	-- able to move the leaders & units around and use end_turn to refresh move count.
 	wml_actions.event({ name="turn refresh", first_time_only="no",
 		{ "lua", { code=[[
 							wml_actions.modify_turns({ current="1" })
@@ -725,9 +727,6 @@ function cc.era_die()
 	if wesnoth.get_variable("cc_scenario") == true then
 		return
 	end
-	-- id="Main Leader"
-	-- role=Leader,Expendable Leader,Hero
-	
 	-- 1. Check if a Leader or Hero has died. If so, end the level in defeat.
 	   -- a. Filter for role="Leader,Hero"
 	   -- b. End the level.
@@ -1390,19 +1389,6 @@ function cc.edit_recruit_end(caller, index)
 end
 
 ----------------- EDIT LEADER RECRUIT ----------------------------
-
--- TODO: Now that there's multi-leader support, add edit_leader_recruit() functions
---		 Likely to be postponded until 1.11. We'll see...
-
--- function cc.edit_leader_recruit(index)
-	-- first make a list of the leaders from the entry to choose
-	-- which one gets it's recruit list edited
-	-- present in order of main leader, then secondaries in alphabetical by type lang name or unit name
-	
-	-- when done creating a recruit list, create a filter recall to match
-	-- (scan unit_types and derive all possible advancement from them.)
-
--- end
 
 function cc.edit_leader_recruit(caller, index, entry)
 	-- first, let the player choose which leader's recruit to edit
