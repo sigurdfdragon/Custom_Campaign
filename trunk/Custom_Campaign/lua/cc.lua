@@ -1519,7 +1519,7 @@ function cc.edit_leader_filter_recall(leader_index, index, recruit)
 	local filter_recall = {}
 	
 	local choice = cc.get_user_choice({ speaker="narrator", message=_"What units would you like this leader to be able to recall?" },
-		{ _"Based on leader recruit", _"Selected race", _"All units" })
+		{ _"Based on leader recruit", _"Selected races", _"All units" })
 	if     choice == 1 then
 		-- Scan each recruit for advaces_to key and add any not present in the recruit list
 		-- to the end of the list
@@ -1565,13 +1565,17 @@ function cc.edit_leader_filter_recall(leader_index, index, recruit)
 				table.remove(race_list, answer)
 				table.remove(race_display, answer)
 			end
-		-- only run the loop once, as SUF race does not take a comma seperated list.
-		-- TODO: remove limitation if race does ever accept a comma seperated list.
-		until answer == 0 or c == 1
+		until answer == 0
 		if next(choices) then
+			-- toplevel race= has full list for conveniet translation
+			-- each element is in an "or" subtag
+			-- this is a workaround because SUF race doesn't take a comma seperated list.
 			table.sort(choices)
 			local races = table.concat(choices, ",")
 			filter_recall = { race = races }
+			for i = 1, #choices do
+				filter_recall[i] = { "or", { race = choices[i] }}
+			end
 		end
 	elseif choice == 3 then
 		filter_recall = {}
@@ -1583,9 +1587,6 @@ function cc.edit_leader_filter_recall(leader_index, index, recruit)
 		end
 	end
 end
-	-- when done creating a recruit list, create a filter recall to match
-	-- (scan unit_types and derive all possible advancement from them.)
-	
 
 ---------------------- EDIT RECRUITMENT PATTERN -----------------
 
