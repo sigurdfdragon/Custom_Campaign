@@ -252,12 +252,12 @@ function cc.unpack_entry(entry, side, name)
 			end
 		elseif entry.starting_recall > 0 then
 			-- sort troops by value and recall the specified number
-			-- sort order: loyal, level, %XP to levelup
+			-- sort order: loyal, level, least XP to levelup
 			local recall_list = wesnoth.get_recall_units({ side=side })
 			local function unit_value_sort(u1, u2)				
 				if u1.__cfg.upkeep == u2.__cfg.upkeep then
 					if u1.__cfg.level == u2.__cfg.level then
-						return u1.experience / u1.max_experience > u1.experience / u2.max_experience
+						return u1.max_experience - u1.experience < u2.max_experience - u2.experiencu
 					else
 						return u1.__cfg.level > u2.__cfg.level
 					end
@@ -905,7 +905,7 @@ function cc.army_options(index)
 	repeat
 		answer = cc.get_user_choice({ speaker="narrator", message="" },
 			{ [0]=msg[index], cc.back_button(), _"View Army", _"Rename Army", _"Change Main Leader", _"Edit Troops",
-			_"Edit Starting Recall", _"Edit Recruit", _"Edit Leader Recruit", _"Edit Recruitment Pattern", _"Information", _"Delete Army" }, 0)
+			_"Edit Starting Recall", _"Edit Recruit", _"Edit Recruitment Pattern", _"Edit Leader Recruit & Recall", _"Information", _"Delete Army" }, 0)
 	until  answer ~= 0
 	if     answer == 1 then return cc.army_list()
 	elseif answer == 2 then return cc.view_entry(army[index], "army", index)
@@ -914,8 +914,8 @@ function cc.army_options(index)
 	elseif answer == 5 then return cc.edit_troops(index)
 	elseif answer == 6 then return cc.edit_starting_recall(index)
 	elseif answer == 7 then return cc.edit_recruit("edit_army", index, army[index])
-	elseif answer == 8 then return cc.edit_leader_recruit("unused_param", index, army[index])
 	elseif answer == 9 then return cc.edit_recruitment_pattern("edit_army", index, army[index])
+	elseif answer == 8 then return cc.edit_leader_recruit("unused_param", index, army[index])
 	elseif answer == 10 then return cc.army_info(index)
 	elseif answer == 11 then return cc.delete_entry("edit_army", index)
 	end
@@ -1820,7 +1820,7 @@ function cc.army_info(index)
 		_"If you have no more leaders left, your are defeated." ..
 		"\n \n" .. _"When you play a scenario, the objectives will list the names of the units whose deaths will cause a loss." ..
 		"\n \n" .. _"Starting Recall lets you set how many troops are recalled at the start of the battle. " ..
-		_"If you pick a number, the troops are prioritized by loyal, then level, then % XP toward level-up. " ..
+		_"If you pick a number, the troops are prioritized by loyal, then level, then least XP toward level-up. " ..
 		_"Heroes, Leaders and Expendable Leaders are always automatically recalled for free."
 	})
 	return cc.army_options(index)
