@@ -1437,6 +1437,12 @@ function cc.edit_leader_recruit(caller, index, entry)
 
 	-- unpack selected leader - check for missing unit as well
 	local u = army[index][leader_index][2]
+	-- clear filter recall
+	for i = 1, #u do
+		if u[i][1] == "filter_recall" then
+			u[i][2] = {}
+		end
+	end
 	if wesnoth.unit_types[u.type] then
 		wesnoth.put_unit(loc[1], loc[2], u)
 	else
