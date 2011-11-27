@@ -775,7 +775,7 @@ end
 ----------------- MAIN MENU -----------------
 
 function cc.main_menu()
-	local answer = cc.get_user_choice({ speaker="narrator", message=_"Custom Campaign 0.9.0 - Main Menu" },
+	local answer = cc.get_user_choice({ speaker="narrator", message=_"Custom Campaign - Main Menu" },
 		{ _"Army List", _"Faction List", _"Side List", _"Instructions", _"Revert to Save",
 		  _"Save and Quit", _"Quit, No Save" })
 
