@@ -1822,7 +1822,7 @@ function cc.army_instructions(index)
 		"\n \n" .. _"All armies start with a Leader, whose death will cause defeat; and a recruit list. " ..
 		_"The commands explained below allow you to modify your army in different ways." ..
 		"\n \n" .. _"View Army shows how your army will look at the start of a scenario." ..
-		"\n \n" .. _"Rename Army will let you change the name of the army" ..
+		"\n \n" .. _"Rename Army will let you change the name of the army." ..
 		"\n \n" .. _"Change Main Leader - If you have more than one leader, you can use this to change which leader represents the army in the Army List." ..
 		"\n \n" .. _"Edit Troops - With this you can add or delete units, including Heroes, Leaders, and Expendable Leaders. " ..
 		_"A Main Leader cannot be deleted under Edit Troops. To remove a unit that is a Main Leader, you must first reassign the status under Change Main Leader. " ..
