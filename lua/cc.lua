@@ -905,7 +905,7 @@ function cc.army_options(index)
 	repeat
 		answer = cc.get_user_choice({ speaker="narrator", message="" },
 			{ [0]=msg[index], cc.back_button(), _"View Army", _"Rename Army", _"Change Main Leader", _"Edit Troops",
-			_"Edit Starting Recall", _"Edit Recruit", _"Edit Recruitment Pattern", _"Edit Leader Recruit & Recall", _"Information", _"Delete Army" }, 0)
+			_"Edit Starting Recall", _"Edit Recruit", _"Edit Recruitment Pattern", _"Edit Leader Recruit & Recall", _"Instructions", _"Delete Army" }, 0)
 	until  answer ~= 0
 	if     answer == 1 then return cc.army_list()
 	elseif answer == 2 then return cc.view_entry(army[index], "army", index)
@@ -916,7 +916,7 @@ function cc.army_options(index)
 	elseif answer == 7 then return cc.edit_recruit("edit_army", index, army[index])
 	elseif answer == 8 then return cc.edit_recruitment_pattern("edit_army", index, army[index])
 	elseif answer == 9 then return cc.edit_leader_recruit("unused_param", index, army[index])
-	elseif answer == 10 then return cc.army_info(index)
+	elseif answer == 10 then return cc.army_instructions(index)
 	elseif answer == 11 then return cc.delete_entry("edit_army", index)
 	end
 end
@@ -1815,19 +1815,28 @@ function cc.edit_starting_recall(index)
 	return cc.army_options(index)
 end
 
------------------ ARMY INFORMATION ----------------------
+----------------- ARMY INSTRUCTIONS ----------------------
 
-function cc.army_info(index)
-	wml_actions.message({ speaker="narrator", message=_"Information about Armies" ..
-		"\n \n" .. _"Each army has a Main Leader. This is the leader whose picture appears for the army entry. " ..
-		"\n \n" .. _"Under Edit Troops, you can add Heroes, Leaders, and Expendable Leaders. " ..
-		_"If you lose a Hero or Leader, you are defeated. " ..
-		_"If your Main Leader is an Expendable Leader and dies, Main Leader status will be reassigned to another Expendable Leader if possible, or a Leader. " ..
-		_"If you have no more leaders left, your are defeated." ..
-		"\n \n" .. _"When you play a scenario, the objectives will list the names of the units whose deaths will cause a loss." ..
-		"\n \n" .. _"Starting Recall lets you set how many troops are recalled at the start of the battle. " ..
-		_"If you pick a number, the troops are prioritized by loyal, then level, then least XP toward level-up. " ..
-		_"Heroes, Leaders and Expendable Leaders are always automatically recalled for free."
+function cc.army_instructions(index)
+	wml_actions.message({ speaker="narrator", message=_"Instructions" ..
+		"\n \n" .. _"All armies start with a Leader, whose death will cause defeat; and a recruit list. " ..
+		_"The commands explained below allow you to modify your army in different ways." ..
+		"\n \n" .. _"View Army shows how your army will look at the start of a scenario." ..
+		"\n \n" .. _"Rename Army will let you change the name of the army" ..
+		"\n \n" .. _"Change Main Leader - If you have more than one leader, you can use this to change which leader represents the army in the Army List." ..
+		"\n \n" .. _"Edit Troops - With this you can add or delete units, including Heroes, Leaders, and Expendable Leaders. " ..
+		_"A Main Leader cannot be deleted under Edit Troops. To remove a unit that is a Main Leader, you must first reassign the status under Change Main Leader. " ..
+		_"When playing a scenario, if you lose a Hero or Leader, you are defeated. " ..
+		_"At the start of a scenario, the objectives will list the names of any Heroes or Leaders whose deaths will cause defeat. " ..
+		_"If your Main Leader is an Expendable Leader and dies, Main Leader status will be reassigned to another Expendable Leader if possible, or to a Leader. " ..
+		_"If you have no more leaders left, your are defeated. " ..
+		"\n \n" .. _"Starting Recall lets you set how many troops are recalled for free at the start of the battle. " ..
+		_"If you pick a number, the troops are prioritized by loyal, then level, then closest toward level-up. " ..
+		_"Heroes, Leaders, and Expendable Leaders are always automatically recalled for free." ..
+		"\n \n" .. _"Edit Recruit allows you to change what units can be recruited by any leader in your army." ..
+		"\n \n" .. _"Edit Recruitment Pattern is only useful if you are droiding the player side and want to see how it would affect the computer AI's playing of the side." ..
+		"\n \n" .. _"Edit Leader Recruit & Recall is an advanced option that allows you to set individual recruit lists and recall filters for each leader you have. " ..
+		_"It is only useful if you have more than one leader." 
 	})
 	return cc.army_options(index)
 end
