@@ -449,12 +449,17 @@ function cc.leader_display_list(index)
 	-- Returns a table to display the leaders for army[index]
 	local t = {}
 	local function leader_sort(u1, u2)
-		if     u1[2].id == "Main Leader" then return true
-		elseif u2[2].id == "Main Leader" then return false
-		elseif u1[2].role == "Leader" then return true
-		elseif u2[2].role == "Leader" then return false
-		elseif u1[2].role == "Expendable Leader" then return true
-		elseif u2[2].role == "Expendable Leader" then return false
+		if     u1[2].id == "Main Leader" and u2[2].id ~= "Main Leader" then return true
+		elseif u1[2].id ~= "Main Leader" and u2[2].id == "Main Leader" then return false
+		elseif u1[2].role == "Leader" and u2[2].role ~= "Leader" then return true
+		elseif u1[2].role ~= "Leader" and u2[2].role == "Leader" then return false
+		elseif u1[2].role == "Expendable Leader" and u2[2].role ~= "Expendable Leader" then return true
+		elseif u1[2].role ~= "Expendable Leader" and u2[2].role == "Expendable Leader" then return false
+		elseif u1[2].name == u2[2].name then
+			if tostring(u1[2].language_name) < tostring(u2[2].language_name) then return true
+			else return false
+			end
+		elseif u1[2].name < u2[2].name then return true
 		else return false
 		end
 	end
