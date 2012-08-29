@@ -639,7 +639,7 @@ function cc.era_prestart()
 						c = c + 1
 					end
 				end
-				objectives[c] = { "objective", { condition="lose", show_turn_counter="yes", description=_"Turns runs out (if applicable)" } }
+				objectives[c] = { "objective", { condition="lose", show_turn_counter="yes", description=_"Turns run out (if applicable)" } }
 				wml_actions.objectives(objectives)
 			elseif choice == 2 then
 				local list = cc.faction_display_list()
