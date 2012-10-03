@@ -1934,14 +1934,25 @@ function cc.trait_list()
 	local trait_feral = { id="feral", male_name=_"feral", female_name=_"female^feral", 
 		description=_"Receive only 50% defense in land-based villages", 
 		{ "effect", { apply_to="defense", replace="true", { "defense", { village=-50 } } } } }
-	local trait_loyal= { id="loyal", male_name=_"loyal", female_name=_"female^loyal",
+	local trait_loyal = { id="loyal", male_name=_"loyal", female_name=_"female^loyal",
 		description=_"Zero upkeep", { "effect", { apply_to="loyal" } } }
+	
+	-- #textdomain wesnoth-Custom_Campaign
+	_ = wesnoth.textdomain "wesnoth-Custom_Campaign"
+	-- add heroic trait (Props to the World Conquest add-on for the idea.)
+	-- This version is different in that it does not have loyal
+	-- and that it has dexterous.
+	local trait_heroic = { id="heroic", male_name=_"heroic", female_name=_"female^heroic",
+		{ "effect", { apply_to="attack", increase_damage=1 } },
+		{ "effect", { apply_to="hitpoints", increase_total=5 } },
+		{ "effect", { apply_to="hitpoints", times="per level", increase_total=1 } },
+		{ "effect", { apply_to="movement", increase=1 } },
+		{ "effect", { apply_to="max_experience", increase="-20%" } } }
 	_ = nil
 	table.insert(all_traits_t, trait_aged)
 	table.insert(all_traits_t, trait_feral)
 	table.insert(all_traits_t, trait_loyal)
-	
-	-- #textdomain wesnoth-Custom_Campaign
+	table.insert(all_traits_t, trait_heroic)
 	
 	-- traverse through all the races and add traits by id that are not already present
 	for k,v in pairs(wesnoth.races) do
