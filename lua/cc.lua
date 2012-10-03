@@ -639,12 +639,9 @@ function cc.era_prestart()
 						c = c + 1
 					end
 				end
-				wml_actions.store_turns("turns")
-				local turns = wesnoth.get_variable("turns")
-				if turns ~= -1 then
-					objectives[c] = { "objective", { condition="lose", show_turn_counter="yes", description=_"Turns run out" } }
-				end
-				wesnoth.set_variable("turns")
+				wml_actions.store_turns( { variable="cc_turn_limit" } )
+				objectives[c] = { "objective", { condition="lose", show_turn_counter="yes", description=_"Turns run out",
+					{ "show_if", { { "variable", { name="cc_turn_limit", not_equals="-1" } } } }   } }
 				wml_actions.objectives(objectives)
 			elseif choice == 2 then
 				local list = cc.faction_display_list()
