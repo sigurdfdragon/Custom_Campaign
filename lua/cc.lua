@@ -1977,7 +1977,12 @@ function cc.get_gender_choice(unit_type)
 	-- Recieves a unit_type, Returns a gender
 	local gender = wesnoth.unit_types[unit_type].__cfg.gender or "male"
 	if gender == "male,female" or gender == "female,male" then
-		local answer = cc.get_user_choice({ speaker="narrator", message=_"Chose a gender for the unit" }, { _"Male", _"Female" })
+		local um = wesnoth.create_unit { type = unit_type, gender = "male" }
+		local uf = wesnoth.create_unit { type = unit_type, gender = "female" }
+		local answer = cc.get_user_choice(
+			{ speaker="narrator", message=_"Chose a gender for the unit:" },
+			{ "&" .. um.__cfg.image .. "~RC(magenta>red)=" .. _"Male ♂" .. "=",
+			  "&" .. uf.__cfg.image .. "~RC(magenta>red)=" .. _"Female ♀" .. "=" } )
 		if     answer == 1 then
 			gender = "male"
 		elseif answer == 2 then
