@@ -2252,7 +2252,7 @@ function cc.customize_unit(u, leader)
 	local uln = wesnoth.unit_types[ut].name
 	local img = wesnoth.unit_types[ut].__cfg.image
 	
-	-- if making a primary leader, force player to option 3 for full customization
+	-- if making a primary leader, force player to option 4 for full customization
 	local answer
 	if not leader then
 		answer = cc.get_user_choice({ speaker="narrator", image=img, message=_"You have chosen " .. uln .. ", how would you like to add it?" },
