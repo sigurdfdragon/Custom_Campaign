@@ -757,10 +757,10 @@ function cc.modification_die()
 		local leaders = wesnoth.get_units({ side=u.side, canrecruit=true, { "not", { id="Main Leader" }} })
 		if next(leaders) then
 			table.sort(leaders, function (u1,u2) return (u1.role < u2.role) end)
-			local new_main = leaders[1].__cfg
-			new_main.id = "Main Leader"
+			local new = leaders[1].__cfg
+			new.id = "Main Leader"
 			wesnoth.extract_unit(leaders[1])
-			wesnoth.put_unit(new_main)
+			wesnoth.put_unit(new)
 		end
 	end
 end
