@@ -514,7 +514,6 @@ end
 function cc.scenario_prestart()
 	 -- Prepare the map for running the main_menu
 	 -- Override lobby fog & shroud settings, Clear objectives, Disable other sides
-	 -- TODO: Override chosen color to red when ability is added to modify_side
 	 -- TODO: If possible, replace warning about launching map with code that
 		   -- will make the player in control of side 1
 	wesnoth.set_variable("=this_will_prevent_loading", "_this_map_from_a_save")
