@@ -532,7 +532,7 @@ function cc.scenario_prestart()
 	cc.clear_menu_items()
 	wml_actions.modify_side({ side="1", gold="1000", income="-2" })
 	wml_actions.set_recruit({ side="1", recruit="" })
-	wml_actions.modify_side({ side="1", controller="human", fog="no", shroud="no" })
+	wml_actions.modify_side({ side="1", controller="human", color="red", fog="no", shroud="no" })
 	wml_actions.objectives({ silent="yes" })
 	
 	for i = 2, 9 do
