@@ -2256,7 +2256,7 @@ function cc.customize_unit(u, leader)
 	local ut = u.type
 	-- use default type & image
 	local uln = wesnoth.unit_types[ut].name
-	local img = wesnoth.unit_types[ut].__cfg.image
+	local img = wesnoth.unit_types[ut].__cfg.image .. "~RC(magenta>red)"
 	
 	-- if making a primary leader, force player to option 4 for full customization
 	local answer
