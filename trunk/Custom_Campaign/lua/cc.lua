@@ -197,8 +197,8 @@ end
 function cc.clear_ids(u_wml)
 	-- Recieves a unit wml table and clears id fields
 	-- to prevent underlying_id collisions when units get placed on the recall list.
-	-- Main Leader does not have id cleared, only underlying_id.
-	if u_wml.id == "Main Leader" then
+	-- Commander does not have id cleared, only underlying_id.
+	if u_wml.id == "Commander" then
 		u_wml.underlying_id = nil -- only clear this
 	else -- clear both id's
 		u_wml.underlying_id = nil; u_wml.id = nil;
@@ -231,8 +231,8 @@ function cc.unpack_entry(entry, side, name)
 		
 		local loc = wesnoth.get_starting_location(side)
 		
-		-- place Main Leader on keep
-		wml_actions.recall({ x=loc[1], y=loc[2], id="Main Leader", show="no", fire_event="no" })
+		-- place Commander on keep
+		wml_actions.recall({ x=loc[1], y=loc[2], id="Commander", show="no", fire_event="no" })
 		
 		-- recall any important leaders, expendable leaders, and heroes
 		local recall_list = wesnoth.get_recall_units({ side=side })
@@ -409,7 +409,7 @@ function cc.army_display_list()
 		
 		local d = {}
 		-- get leader info
-		local u = helper.get_child(army[i], "troop_list", "Main Leader")
+		local u = helper.get_child(army[i], "troop_list", "Commander")
 		if wesnoth.unit_types[u.type] ~= nil then
 			d.image = u.image
 			d.language_name = u.language_name
@@ -435,7 +435,7 @@ function cc.army_display_list()
 		
 		-- assemble the [message] entry
 		t[i] = "&" .. d.image .. "~RC(magenta>red)=" .. d.name ..
-		 "\n<small><small>" .. _"Main Leader: " .. d.leader_name .. ", " .. d.language_name .. 
+		 "\n<small><small>" .. _"Commander: " .. d.leader_name .. ", " .. d.language_name .. 
 		 "\n" .. _"Troops: " .. d.troops .. _"  Starting Recall: " .. d.starting_recall .. _"  Victories: " .. d.victories .. _"  Last Victory: " .. d.last_victory .. 
 		 "\n" .. _"Recruit: " .. d.recruit .. 
 		 "\n" .. _"Recruitment Pattern: " .. d.recruitment_pattern .. "</small></small>="
@@ -449,8 +449,8 @@ function cc.leader_display_list(index)
 	-- Returns a table to display the leaders for army[index]
 	local t = {}
 	local function leader_sort(u1, u2)
-		if     u1[2].id == "Main Leader" and u2[2].id ~= "Main Leader" then return true
-		elseif u1[2].id ~= "Main Leader" and u2[2].id == "Main Leader" then return false
+		if     u1[2].id == "Commander" and u2[2].id ~= "Commander" then return true
+		elseif u1[2].id ~= "Commander" and u2[2].id == "Commander" then return false
 		elseif u1[2].role == "Leader" and u2[2].role ~= "Leader" then return true
 		elseif u1[2].role ~= "Leader" and u2[2].role == "Leader" then return false
 		elseif u1[2].role == "Expendable Leader" and u2[2].role ~= "Expendable Leader" then return true
@@ -619,13 +619,13 @@ function cc.modification_prestart()
 				objectives[c] = { "objective", { condition="win", description=_"Defeat enemy leader(s)" } }
 				c = c + 1
 				for u in helper.child_range(army[index], "troop_list") do
-					if u.id == "Main Leader" and u.role == "Leader" then
+					if u.id == "Commander" and u.role == "Leader" then
 						objectives[c] = { "objective", { condition="lose", description=_"Death of " .. u.name } }
 						c = c + 1
 					end
 				end
 				for u in helper.child_range(army[index], "troop_list") do
-					if u.role == "Leader" and u.id ~= "Main Leader" then
+					if u.role == "Leader" and u.id ~= "Commander" then
 						objectives[c] = { "objective", { condition="lose", description=_"Death of " .. u.name } }
 						c = c + 1
 					end
@@ -747,18 +747,18 @@ function cc.modification_die()
 	if u.role == "Leader" or u.role == "Hero" then
 		wml_actions.endlevel({ result="defeat" })
 	end
-	-- 2. If an Expendable Leader that is the Main Leader has died, try to reassign Main Leader status to
+	-- 2. If an Expendable Leader that is the Commander has died, try to reassign Commander status to
 	   -- first to another Expendable Leader, second to a Leader. (just get the first one that matches the filter
-	   -- in either case, and give that one id="Main Leader".) Assume that since the player made the
-	   -- Main Leader an Expendable one, he'd like to reassign Main Leader status to another Expendable Leader if possible.
-	   -- a. check if id="Main Leader" and role="Expendable Leader"
+	   -- in either case, and give that one id="Commander".) Assume that since the player made the
+	   -- Commander an Expendable one, he'd like to reassign Commander status to another Expendable Leader if possible.
+	   -- a. check if id="Commander" and role="Expendable Leader"
 	   -- b. Filter for role="Expendable Leader" then for role="Leader"
-	if u.id == "Main Leader" and u.role == "Expendable Leader" then
-		local leaders = wesnoth.get_units({ side=u.side, canrecruit=true, { "not", { id="Main Leader" }} })
+	if u.id == "Commander" and u.role == "Expendable Leader" then
+		local leaders = wesnoth.get_units({ side=u.side, canrecruit=true, { "not", { id="Commander" }} })
 		if next(leaders) then
 			table.sort(leaders, function (u1,u2) return (u1.role < u2.role) end)
 			local new = leaders[1].__cfg
-			new.id = "Main Leader"
+			new.id = "Commander"
 			wesnoth.extract_unit(leaders[1])
 			wesnoth.put_unit(new)
 		end
@@ -772,7 +772,7 @@ function cc.modification_start()
 	if wesnoth.get_variable("cc_scenario") == true then
 		return
 	end
-	wml_actions.message({ id="Main Leader", message=_"To arms!" })
+	wml_actions.message({ id="Commander", message=_"To arms!" })
 end
 
 ----------------- MODIFICATION ENEMIES DEFEATED -------
@@ -782,7 +782,7 @@ function cc.modification_enemies_defeated()
 	if wesnoth.get_variable("cc_scenario") == true then
 		return
 	end
-	wml_actions.message({ id="Main Leader", message=_"Victory!" })
+	wml_actions.message({ id="Commander", message=_"Victory!" })
 end
 
 ----------------- MAIN MENU -----------------
@@ -917,7 +917,7 @@ function cc.army_options(index)
 	local answer = 0
 	repeat
 		answer = cc.get_user_choice({ speaker="narrator", message="" },
-			{ [0]=msg[index], cc.back_button(), _"View Army", _"Rename Army", _"Change Main Leader", _"Edit Troops",
+			{ [0]=msg[index], cc.back_button(), _"View Army", _"Rename Army", _"Change Commander", _"Edit Troops",
 			_"Edit Starting Recall", _"Edit Recruit", _"Edit Recruitment Pattern", _"Edit Leader Recruit & Recall", _"Instructions", _"Delete Army" }, 0)
 	until  answer ~= 0
 	if     answer == 1 then return cc.army_list()
@@ -1184,7 +1184,7 @@ function cc.edit_leader_end(caller, index)
 	
 	if caller == "edit_army" then
 		for u = 1, #army[index] do
-			if army[index][u][2].id == "Main Leader" then
+			if army[index][u][2].id == "Commander" then
 				army[index][u][2] = u.__cfg
 				break
 			end
@@ -1288,7 +1288,7 @@ function cc.edit_recruit(caller, index, entry)
 		end
 	else
 		-- army leader - check for missing unit as well
-		local u = helper.get_child(entry, "troop_list", "Main Leader")
+		local u = helper.get_child(entry, "troop_list", "Commander")
 		if wesnoth.unit_types[u.type] then
 			wesnoth.put_unit(loc[1], loc[2], u)
 		else
@@ -1724,7 +1724,7 @@ function cc.edit_troops(index)
 		{ "show_if", { } },
 		{ "command", { { "lua", { code="wml_actions.set_recruit({ side=1, recruit=army[" .. index .. "].recruit })" } } } } })
 	wml_actions.set_menu_item({ id=6, description=_"Delete Unit",
-		{ "show_if", { { "have_unit", { x="$x1", y="$y1", { "not", { id="Main Leader" } } } } } },
+		{ "show_if", { { "have_unit", { x="$x1", y="$y1", { "not", { id="Commander" } } } } } },
 		{ "command", { { "lua", { code=[[wml_actions.kill({ x="$x1", y="$y1", animate="no", fire_event="no" })]] } } } } })
 		
 	-- create recruit event
@@ -1811,10 +1811,10 @@ function cc.change_main_leader(index)
 	local options = cc.leader_display_list(index)
 	-- calling leader display sorts the units so the leaders are on top, with main leader first
 	-- thus we can use the integer from player's choice to make the needed change
-	-- clear current designation of Main Leader
+	-- clear current designation of Commander
 	army[index][1][2].id = nil
-	local choice = cc.get_user_choice({ speaker="narrator", message=_"Select a leader to be the Main Leader." }, options)
-	army[index][choice][2].id = "Main Leader"
+	local choice = cc.get_user_choice({ speaker="narrator", message=_"Select a leader to be the Commander." }, options)
+	army[index][choice][2].id = "Commander"
 	return cc.army_options(index)
 end
 
@@ -1836,12 +1836,12 @@ function cc.army_instructions(index)
 		_"The commands explained below allow you to modify your army in different ways." ..
 		"\n \n" .. _"View Army shows how your army will look at the start of a scenario." ..
 		"\n \n" .. _"Rename Army will let you change the name of the army." ..
-		"\n \n" .. _"Change Main Leader - If you have more than one leader, you can use this to change which leader represents the army in the Army List." ..
+		"\n \n" .. _"Change Commander - If you have more than one leader, you can use this to change which leader represents the army in the Army List." ..
 		"\n \n" .. _"Edit Troops - With this you can add or delete units, including Heroes, Leaders, and Expendable Leaders. " ..
-		_"A Main Leader cannot be deleted under Edit Troops. To remove a unit that is a Main Leader, you must first reassign the status under Change Main Leader. " ..
+		_"A Commander cannot be deleted under Edit Troops. To remove a unit that is a Commander, you must first reassign the status under Change Commander. " ..
 		_"When playing a scenario, if you lose a Hero or Leader, you are defeated. " ..
 		_"At the start of a scenario, the objectives will list the names of any Heroes or Leaders whose deaths will cause defeat. " ..
-		_"If your Main Leader is an Expendable Leader and dies, Main Leader status will be reassigned to another Expendable Leader if possible, or to a Leader. " ..
+		_"If your Commander is an Expendable Leader and dies, Commander status will be reassigned to another Expendable Leader if possible, or to a Leader. " ..
 		_"If you have no more leaders left, your are defeated. " ..
 		"\n \n" .. _"Starting Recall lets you set how many troops are recalled for free at the start of the battle. " ..
 		_"If you pick a number, the troops are prioritized by loyal, then level, then closest toward level-up. " ..
@@ -2283,7 +2283,7 @@ function cc.customize_unit(u, leader)
 		end
 	elseif answer == 4 or leader then
 		-- menu for chosen gender, variation, and up to any 5 traits.
-		local id -- kept nil unless making a Main Leader
+		local id -- kept nil unless making a Commander
 		local role -- kept nil, unless making a Leader, Expendable Leader, or Hero
 		local g = cc.get_gender_choice(ut)
 		local v = cc.get_variation_choice(ut)
@@ -2297,7 +2297,7 @@ function cc.customize_unit(u, leader)
 		end
 		
 		if leader then
-			id = "Main Leader"
+			id = "Commander"
 			role = "Leader"
 		else
 			local choice = cc.get_user_choice({ speaker="narrator", message=_"Would you like to make this unit special?" },
