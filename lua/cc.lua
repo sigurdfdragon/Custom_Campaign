@@ -550,22 +550,22 @@ function cc.scenario_prestart()
 						]] } } })
 end
 
------------------- ERA PRESTART --------------------
+------------------ MODIFICATION PRESTART --------------------
 
 -- look through all sides on map
 -- let player choose an army for a human controlled side (player may want to play as a side other than 1)
 -- display warning if player launched the map with more than 1 human controlled side and quit
 -- let player select factions for AI sides.
-function cc.era_prestart()
+function cc.modification_prestart()
 	-- Not used, but could be checked for by scenarios
-	wesnoth.set_variable("cc_era", true)
+	wesnoth.set_variable("cc_modification", true)
 	
-	-- disable era functionality if launched with Custom Campaign Map
+	-- disable modification functionality if launched with Custom Campaign Map
 	if wesnoth.get_variable("cc_scenario") == true then
 		return
 	end
 	
-	-- disable era if human sides > 1
+	-- disable modification if human sides > 1
 	local humans = 0
 	local sides = wesnoth.get_sides()
 	for i,v in ipairs(sides) do
@@ -581,20 +581,22 @@ function cc.era_prestart()
 	end
 	sides = nil
 	
-	-- disable era if player hasn't made any armies
+	-- disable modification if player hasn't made any armies
 	cc.load_globals()
 	if next(army) == nil then
 		wml_actions.message({ speaker="narrator", message=_"You need at least one army to play. Create it at the Custom Campaign Map." })
 		return cc.endlevel()
 	end
 		
-	-- Show faction menu for each computer side,
-	-- army menu for player side, and skip null sides
+	-- Show choice of army menu or faction menu for human side,
+	-- present option of leave side empty or faction choice for each null side,
+	-- and leave ai sides alone.
 	-- check based on side.controller
-	local sides = wesnoth.get_sides({ {"has_unit", { type="Custom Campaign Unit" }} })
-	wml_actions.kill({ type="Custom Campaign Unit", animate="no", fire_event="no" })
+	local sides = wesnoth.get_sides()
 	for i,v in ipairs(sides) do
 		if v.controller == "human" then
+			-- kill existing leader to be replaced
+			wml_actions.kill({ side=v.side, canrecruit="yes", animate="no", fire_event="no" })
 			-- give choice between army or faction
 			local choice = cc.get_user_choice({ speaker="narrator", message=_"Would you like to play an Army (saved on victory) or a Faction (not saved) for side " .. v.side .."?" }, { _"Army", _"Faction" })
 			if choice == 1 then
@@ -648,10 +650,15 @@ function cc.era_prestart()
 				local index = cc.get_user_choice({ speaker="narrator", message=_"Choose your faction for side " .. v.side }, list)
 				cc.unpack_entry(faction[index], v.side)
 			end
-		elseif v.controller == "ai" then
+		elseif v.controller == "null" then
+			-- player wants to use a custom faction for this side or leave it empty.
 			local list = cc.faction_display_list()
-			local index = cc.get_user_choice({ speaker="narrator", message=_"Choose a faction for side " .. v.side .. " (" .. v.gold .. " Gold, " .. v.base_income .. " Income)" }, list)
-			cc.unpack_entry(faction[index], v.side)
+			list[0] = "Leave Side Empty"
+			local index = cc.get_user_choice({ speaker="narrator", message=_"Choose a faction for side " .. v.side .. " (" .. v.gold .. " Gold, " .. v.base_income .. " Income)" }, list, 0)
+			if index ~= 0 then
+				v.controller = "ai"
+				cc.unpack_entry(faction[index], v.side)
+			end
 		end
 	end
 
@@ -659,9 +666,9 @@ function cc.era_prestart()
 	army, faction, id = nil, nil, nil
 end
 
------------------- ERA VICTORY --------------------
+------------------ MODIFICATION VICTORY --------------------
 
-function cc.era_victory()
+function cc.modification_victory()
 	-- retrieve the chosen_army wml_var
 	local chosen_army = wesnoth.get_variable("cc_chosen_army")
 	
@@ -727,10 +734,10 @@ function cc.era_victory()
 	cc.save_globals()
 end
 
------------------ ERA DIE -------------------
+----------------- MODIFICATION DIE -------------------
 
-function cc.era_die()
-	-- disable era functionality if launched with Custom Campaign Map
+function cc.modification_die()
+	-- disable modification functionality if launched with Custom Campaign Map
 	if wesnoth.get_variable("cc_scenario") == true then
 		return
 	end
@@ -759,20 +766,20 @@ function cc.era_die()
 	end
 end
 
------------------ ERA START ------------------
+----------------- MODIFICATION START ------------------
 
-function cc.era_start()
-	-- disable era functionality if launched with Custom Campaign Map
+function cc.modification_start()
+	-- disable modification functionality if launched with Custom Campaign Map
 	if wesnoth.get_variable("cc_scenario") == true then
 		return
 	end
 	wml_actions.message({ id="Main Leader", message=_"To arms!" })
 end
 
------------------ ERA ENEMIES DEFEATED -------
+----------------- MODIFICATION ENEMIES DEFEATED -------
 
-function cc.era_enemies_defeated()
-	-- disable era functionality if launched with Custom Campaign Map
+function cc.modification_enemies_defeated()
+	-- disable modification functionality if launched with Custom Campaign Map
 	if wesnoth.get_variable("cc_scenario") == true then
 		return
 	end
