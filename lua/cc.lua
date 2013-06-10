@@ -221,7 +221,7 @@ function cc.unpack_entry(entry, side, name)
 	-- army stuff, entry.leader will be nil for army
 	if entry.leader == nil then
 		-- unpack army to recall list
-		for u in helper.child_range(entry, "troop_list") do
+		for u in helper.child_range(entry, "recall_list") do
 			cc.clear_ids(u)
 			u.side = side
 			if wesnoth.unit_types[u.type] then
@@ -245,13 +245,13 @@ function cc.unpack_entry(entry, side, name)
 
 		-- additional recalls
 		if entry.starting_recall == -1 then
-			-- recall all loyal troops
+			-- recall all loyal units
 			local recall_list = wesnoth.get_recall_units({ side=side })
 			for i = 1, #recall_list do
 				wml_actions.recall({ x=loc[1], y=loc[2], { "filter_wml", { upkeep="loyal" }}, show="no", fire_event="no" })
 			end
 		elseif entry.starting_recall > 0 then
-			-- sort troops by value and recall the specified number
+			-- sort units by value and recall the specified number
 			-- sort order: loyal, level, least XP to levelup
 			local recall_list = wesnoth.get_recall_units({ side=side })
 			local function unit_value_sort(u1, u2)				
@@ -409,7 +409,7 @@ function cc.army_display_list()
 		
 		local d = {}
 		-- get leader info
-		local u = helper.get_child(army[i], "troop_list", "Commander")
+		local u = helper.get_child(army[i], "recall_list", "Commander")
 		if wesnoth.unit_types[u.type] ~= nil then
 			d.image = u.image
 			d.language_name = u.language_name
@@ -422,7 +422,7 @@ function cc.army_display_list()
 
 
 		d.name = army[i].name
-		d.troops = #army[i] - 1 -- subtract for primary leader
+		d.units = #army[i] - 1 -- subtract for primary leader
 		d.last_victory = army[i].last_victory
 		d.recruit = cc.recruit_translate(army[i].recruit)
 		d.recruitment_pattern = army[i].recruitment_pattern
@@ -436,7 +436,7 @@ function cc.army_display_list()
 		-- assemble the [message] entry
 		t[i] = "&" .. d.image .. "~RC(magenta>red)=" .. d.name ..
 		 "\n<small><small>" .. _"Commander: " .. d.leader_name .. ", " .. d.language_name .. 
-		 "\n" .. _"Troops: " .. d.troops .. _"  Starting Recall: " .. d.starting_recall .. _"  Victories: " .. d.victories .. _"  Last Victory: " .. d.last_victory .. 
+		 "\n" .. _"Units: " .. d.units .. _"  Starting Recall: " .. d.starting_recall .. _"  Victories: " .. d.victories .. _"  Last Victory: " .. d.last_victory .. 
 		 "\n" .. _"Recruit: " .. d.recruit .. 
 		 "\n" .. _"Recruitment Pattern: " .. d.recruitment_pattern .. "</small></small>="
 	end
@@ -466,7 +466,7 @@ function cc.leader_display_list(index)
 	table.sort(army[index], leader_sort)
 	
 	local i = 0
-	for u in helper.child_range(army[index], "troop_list") do
+	for u in helper.child_range(army[index], "recall_list") do
 		local d = {}
 		if u.canrecruit == true then
 			if wesnoth.unit_types[u.type] ~= nil then
@@ -606,7 +606,7 @@ function cc.modification_prestart()
 				-- make copy to place into wml_var
 				local chosen_army = cc.deep_copy(army[index])
 				chosen_army.side = v.side
-				-- clear troop list
+				-- clear recall_list
 				for i = 1, #chosen_army do
 					chosen_army[i] = nil
 				end
@@ -618,13 +618,13 @@ function cc.modification_prestart()
 				local c = 1
 				objectives[c] = { "objective", { condition="win", description=_"Defeat enemy leader(s)" } }
 				c = c + 1
-				for u in helper.child_range(army[index], "troop_list") do
+				for u in helper.child_range(army[index], "recall_list") do
 					if u.id == "Commander" and u.role == "Leader" then
 						objectives[c] = { "objective", { condition="lose", description=_"Death of " .. u.name } }
 						c = c + 1
 					end
 				end
-				for u in helper.child_range(army[index], "troop_list") do
+				for u in helper.child_range(army[index], "recall_list") do
 					if u.role == "Leader" and u.id ~= "Commander" then
 						objectives[c] = { "objective", { condition="lose", description=_"Death of " .. u.name } }
 						c = c + 1
@@ -634,7 +634,7 @@ function cc.modification_prestart()
 					objectives[c] = { "objective", { condition="lose", description=_"Death of your leader(s)" } }
 					c = c + 1
 				end
-				for u in helper.child_range(army[index], "troop_list") do
+				for u in helper.child_range(army[index], "recall_list") do
 					if  u.role == "Hero" then
 						objectives[c] = { "objective", { condition="lose", description=_"Death of " .. u.name } }
 						c = c + 1
@@ -708,7 +708,7 @@ function cc.modification_victory()
 
 	-- add the unit list to the chosen_army table
 	for u = 1, #units do
-		chosen_army[u] = { "troop_list", units[u] }
+		chosen_army[u] = { "recall_list", units[u] }
 	end
 
 	chosen_army.victories = chosen_army.victories + 1
@@ -917,14 +917,14 @@ function cc.army_options(index)
 	local answer = 0
 	repeat
 		answer = cc.get_user_choice({ speaker="narrator", message="" },
-			{ [0]=msg[index], cc.back_button(), _"View Army", _"Rename Army", _"Change Commander", _"Edit Troops",
+			{ [0]=msg[index], cc.back_button(), _"View Army", _"Rename Army", _"Change Commander", _"Edit Recall List",
 			_"Edit Starting Recall", _"Edit Recruit", _"Edit Recruitment Pattern", _"Edit Leader Recruit & Recall", _"Instructions", _"Delete Army" }, 0)
 	until  answer ~= 0
 	if     answer == 1 then return cc.army_list()
 	elseif answer == 2 then return cc.view_entry(army[index], "army", index)
 	elseif answer == 3 then return cc.rename_entry("edit_army", index, army[index])
 	elseif answer == 4 then return cc.change_main_leader(index)
-	elseif answer == 5 then return cc.edit_troops(index)
+	elseif answer == 5 then return cc.edit_recall_list(index)
 	elseif answer == 6 then return cc.edit_starting_recall(index)
 	elseif answer == 7 then return cc.edit_recruit("edit_army", index, army[index])
 	elseif answer == 8 then return cc.edit_recruitment_pattern("edit_army", index, army[index])
@@ -981,7 +981,7 @@ function cc.create_army_from_entry(t)
 	u = cc.customize_unit(u, true)
 	
 	-- put unit in [recall_list]
-	new[1] = { "troop_list", u.__cfg }
+	new[1] = { "recall_list", u.__cfg }
 	
 	new.name = cc.get_text_input({ speaker = "narrator", message = _"Enter a name for your Army:" }, { text = temp_name })
 	
@@ -1032,7 +1032,7 @@ function cc.create_faction_from_army()
 		cc.army_display_list() )
 	local new_faction = {}
 	
-	for rl in helper.child_range(army[index], "troop_list") do
+	for rl in helper.child_range(army[index], "recall_list") do
 		if rl.canrecruit == true then
 			new_faction.leader = rl.type
 			new_faction.image = rl.image
@@ -1196,7 +1196,7 @@ function cc.edit_leader_end(caller, index)
 		faction[index].image = u.__cfg.image
 	elseif caller == "custom_army" then
 		-- add to custom_entry
-		custom[1] = { "troop_list", u.__cfg }
+		custom[1] = { "recall_list", u.__cfg }
 	elseif caller == "custom_faction" then
 		-- add to custom_entry
 		custom.leader = u.type
@@ -1288,7 +1288,7 @@ function cc.edit_recruit(caller, index, entry)
 		end
 	else
 		-- army leader - check for missing unit as well
-		local u = helper.get_child(entry, "troop_list", "Commander")
+		local u = helper.get_child(entry, "recall_list", "Commander")
 		if wesnoth.unit_types[u.type] then
 			wesnoth.put_unit(loc[1], loc[2], u)
 		else
@@ -1705,21 +1705,21 @@ Choose an entry more than once to increase that group's chance of being recruite
 	end
 end
 
----------------------- EDIT TROOPS ----------------------
+---------------------- EDIT RECALL LIST ----------------------
 
-function cc.edit_troops(index)
-	wml_actions.set_menu_item({ id=1, description=_"End Edit Troops",
+function cc.edit_recall_list(index)
+	wml_actions.set_menu_item({ id=1, description=_"End Edit Recall List",
 		{ "show_if", { } },
-		{ "command", { { "lua", { code="cc.edit_troops_end(" .. index .. ")" } } } } })
-	wml_actions.set_menu_item({ id=2, description=_"Edit Troops Instructions",
+		{ "command", { { "lua", { code="cc.edit_recall_list_end(" .. index .. ")" } } } } })
+	wml_actions.set_menu_item({ id=2, description=_"Edit Recall List Instructions",
 		{ "show_if", { } },
-		{ "command", { { "message", { speaker="narrator", message=_"Use Recruit to add a unit to the Recall list. Dismiss a unit from the Recall list to remove it. Recall a unit to edit things like name. Right-Click a unit on the map, and you can select a command to delete it." } } } } })
+		{ "command", { { "message", { speaker="narrator", message=_"Use Recruit to add a unit to the Recall List. Dismiss a unit from the Recall list to remove it. Recall a unit to edit things like name. Right-Click a unit on the map, and you can select a command to delete it." } } } } })
 	wml_actions.set_menu_item({ id=3, description=_"Unit Filters",
 		{ "show_if", { } },
 		{ "command", { { "lua", { code="cc.unit_filters()" } } } } })
 	wml_actions.set_menu_item({ id=4, description=_"Return Units to Recall List",
 		{ "show_if", { } },
-		{ "command", { { "lua", { code="cc.edit_troops_return_units()" } } } } })
+		{ "command", { { "lua", { code="cc.edit_recall_list_return_units()" } } } } })
 	wml_actions.set_menu_item({ id=5, description=_"Set Recruit to Army Recruit",
 		{ "show_if", { } },
 		{ "command", { { "lua", { code="wml_actions.set_recruit({ side=1, recruit=army[" .. index .. "].recruit })" } } } } })
@@ -1737,7 +1737,7 @@ function cc.edit_troops(index)
 	return cc.unpack_entry(army[index], 1)
 end
 
-function cc.edit_troops_return_units()
+function cc.edit_recall_list_return_units()
 	local units = {}
 	for i,u in ipairs(wesnoth.get_recall_units({ side=1 })) do
 		wesnoth.extract_unit(u)
@@ -1754,9 +1754,9 @@ function cc.edit_troops_return_units()
 	end
 end
 
-function cc.edit_troops_end(index)
+function cc.edit_recall_list_end(index)
 	-- save changes back into recall list
-	-- get the __cfg for all units and place into troop_list field in appropriate army
+	-- get the __cfg for all units and place into recall_list field in appropriate army
 	local choice = cc.get_user_choice({ speaker="narrator", message=_"Choose option:"},
 		{ _"End and accept edits", _"End and discard edits", _"Continue editing" })
 	
@@ -1791,7 +1791,7 @@ function cc.edit_troops_end(index)
 		end
 		-- add the edited unit list
 		for u = 1, #units do
-			army[index][u] = { "troop_list", units[u] }
+			army[index][u] = { "recall_list", units[u] }
 		end
 	end
 	
@@ -1823,7 +1823,7 @@ end
 
 function cc.edit_starting_recall(index)
 	local list = { [-1]=_"All Loyal", [0]=0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }
-	local choice = cc.get_user_choice({ speaker="narrator", message=_"How many troops would you like to have automatically recalled at the start of a battle?"}, list, -1)
+	local choice = cc.get_user_choice({ speaker="narrator", message=_"How many units would you like to have automatically recalled at the start of a battle?"}, list, -1)
 	army[index].starting_recall = choice
 	return cc.army_options(index)
 end
@@ -1837,14 +1837,14 @@ function cc.army_instructions(index)
 		"\n \n" .. _"View Army shows how your army will look at the start of a scenario." ..
 		"\n \n" .. _"Rename Army will let you change the name of the army." ..
 		"\n \n" .. _"Change Commander - If you have more than one leader, you can use this to change which leader represents the army in the Army List." ..
-		"\n \n" .. _"Edit Troops - With this you can add or delete units, including Heroes, Leaders, and Expendable Leaders. " ..
-		_"A Commander cannot be deleted under Edit Troops. To remove a unit that is a Commander, you must first reassign the status under Change Commander. " ..
+		"\n \n" .. _"Edit Recall List - With this you can add or delete units, including Heroes, Leaders, and Expendable Leaders. " ..
+		_"A Commander cannot be deleted under Edit Recall List. To remove a unit that is a Commander, you must first reassign the status under Change Commander. " ..
 		_"When playing a scenario, if you lose a Hero or Leader, you are defeated. " ..
 		_"At the start of a scenario, the objectives will list the names of any Heroes or Leaders whose deaths will cause defeat. " ..
 		_"If your Commander is an Expendable Leader and dies, Commander status will be reassigned to another Expendable Leader if possible, or to a Leader. " ..
 		_"If you have no more leaders left, your are defeated. " ..
-		"\n \n" .. _"Starting Recall lets you set how many troops are recalled for free at the start of the battle. " ..
-		_"If you pick a number, the troops are prioritized by loyal, then level, then closest toward level-up. " ..
+		"\n \n" .. _"Starting Recall lets you set how many units are recalled for free at the start of the battle. " ..
+		_"If you pick a number, the units are prioritized by loyal, then level, then closest toward level-up. " ..
 		_"Heroes, Leaders, and Expendable Leaders are always automatically recalled for free." ..
 		"\n \n" .. _"Edit Recruit allows you to change what units can be recruited by any leader in your army." ..
 		"\n \n" .. _"Edit Recruitment Pattern is only useful if you are droiding the player side and want to see how it would affect the computer AI's playing of the side." ..
