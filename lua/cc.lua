@@ -207,10 +207,7 @@ end
 
 function cc.clear_menu_items()
 	for i = 1, 7 do
-		wml_actions.set_menu_item({ id=i, description="Null",
-			{ "show_if", { { "variable", { name="This_will_hide", equals="_this_menu_item" } } } },
-			{ "command", { { "lua", { code="" } } } }
-		})
+		wml_actions.clear_menu_item({ id=i })
 	end
 end
 
