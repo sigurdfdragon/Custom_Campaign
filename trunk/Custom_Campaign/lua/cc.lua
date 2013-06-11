@@ -1569,15 +1569,9 @@ function cc.edit_leader_filter_recall(leader_index, index, recruit)
 			end
 		until answer == 0
 		if next(choices) then
-			-- toplevel race= has full list for conveniet translation
-			-- each element is in an "or" subtag
-			-- this is a workaround because SUF race doesn't take a comma seperated list.
 			table.sort(choices)
 			local races = table.concat(choices, ",")
 			filter_recall = { race = races }
-			for i = 1, #choices do
-				filter_recall[i] = { "or", { race = choices[i] }}
-			end
 		end
 	elseif choice == 3 then
 		filter_recall = {}
