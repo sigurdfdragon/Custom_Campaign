@@ -2501,7 +2501,7 @@ function cc.find_levels(unit_types)
     -- Recieves an array of unit_types; Returns an array of levels
     local level_list = {}
 	for i = 1, #unit_types do
-        local unit_level = wesnoth.get_unit_type(unit_types[i]).__cfg.level
+        local unit_level = wesnoth.unit_types[unit_types[i]].__cfg.level
         local level_is_present = false
 		for j = 1, #level_list do
             if unit_level == level_list[j]  then
@@ -2520,7 +2520,7 @@ function cc.find_moves(unit_types)
 	-- Recieves an array of unit_types; Returns an array of levels
     local move_list = {}
 	for i = 1, #unit_types do
-        local unit_move = wesnoth.get_unit_type(unit_types[i]).__cfg.movement
+        local unit_move = wesnoth.unit_types[unit_types[i]].__cfg.movement
         local move_is_present = false
 		for i = 1, #move_list do
             if unit_move == move_list[i]  then
