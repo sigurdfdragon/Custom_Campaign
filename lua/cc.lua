@@ -5,8 +5,8 @@ wml_actions = wesnoth.wml_actions
 
 local cc = {}
 
--- Leaving in Khalifate, they will be considered core if player has the add-on.
-cc["core_list"] = "Ancient Lich,Ancient Wose,Arch Mage,Arif,Armageddon Drake,Assassin,Bandit,Banebow,Batal,Blood Bat,Boat,Bone Shooter,Bowman,Cavalier,Cavalryman,Chocobone,Cuttle Fish,Dark Adept,Dark Sorcerer,Death Knight,Deathblade,Direwolf,Direwolf Rider,Dragoon,Drake Arbiter,Drake Blademaster,Drake Burner,Drake Clasher,Drake Enforcer,Drake Fighter,Drake Flameheart,Drake Flare,Drake Glider,Drake Thrasher,Drake Warden,Drake Warrior,Draug,Dread Bat,Duelist,Dwarvish Arcanister,Dwarvish Berserker,Dwarvish Dragonguard,Dwarvish Explorer,Dwarvish Fighter,Dwarvish Guardsman,Dwarvish Lord,Dwarvish Pathfinder,Dwarvish Runemaster,Dwarvish Runesmith,Dwarvish Scout,Dwarvish Sentinel,Dwarvish Stalwart,Dwarvish Steelclad,Dwarvish Thunderer,Dwarvish Thunderguard,Dwarvish Ulfserker,Elder Falcon,Elder Mage,Elder Wose,Elvish Archer,Elvish Avenger,Elvish Captain,Elvish Champion,Elvish Druid,Elvish Enchantress,Elvish Fighter,Elvish Hero,Elvish High Lord,Elvish Lady,Elvish Lord,Elvish Marksman,Elvish Marshal,Elvish Outrider,Elvish Ranger,Elvish Rider,Elvish Scout,Elvish Shaman,Elvish Sharpshooter,Elvish Shyde,Elvish Sorceress,Elvish Sylph,Falcon,Faris,Fencer,Fire Dragon,Fire Drake,Fire Guardian,Fog Clearer,Footpad,Fugitive,Galleon,General,Ghast,Ghazi,Ghost,Ghoul,Giant Mudcrawler,Giant Rat,Giant Scorpion,Giant Spider,Goblin Impaler,Goblin Knight,Goblin Pillager,Goblin Rouser,Goblin Spearman,Grand Knight,Grand Marshal,Great Mage,Great Troll,Great Wolf,Gryphon,Gryphon Master,Gryphon Rider,Hadaf,Hakim,Halberdier,Heavy Infantryman,Highwayman,Horseman,Huntsman,Hurricane Drake,Inferno Drake,Iron Mauler,Javelineer,Jawal,Jundi,Khaiyal,Khalid,Knight,Lancer,Lich,Lieutenant,Longbowman,Mage,Mage of Light,Master at Arms,Master Bowman,Mermaid Diviner,Mermaid Enchantress,Mermaid Initiate,Mermaid Priestess,Mermaid Siren,Merman Entangler,Merman Fighter,Merman Hoplite,Merman Hunter,Merman Javelineer,Merman Netcaster,Merman Spearman,Merman Triton,Merman Warrior,Mighwar,Monawish,Mudafi,Mudcrawler,Mufariq,Muharib,Naffat,Naga Fighter,Naga Myrmidon,Naga Warrior,Necromancer,Necrophage,Nightgaunt,Ogre,Orcish Archer,Orcish Assassin,Orcish Crossbowman,Orcish Grunt,Orcish Leader,Orcish Ruler,Orcish Slayer,Orcish Slurbow,Orcish Sovereign,Orcish Warlord,Orcish Warrior,Outlaw,Paladin,Peasant,Pikeman,Pirate Galleon,Poacher,Qanas,Qatif-al-nar,Rami,Ranger,Rasikh,Red Mage,Revenant,Rogue,Royal Guard,Royal Warrior,Ruffian,Saree,Saurian Ambusher,Saurian Augur,Saurian Flanker,Saurian Oracle,Saurian Skirmisher,Saurian Soothsayer,Sea Serpent,Sergeant,Shadow,Shock Trooper,Shuja,Silver Mage,Skeletal Dragon,Skeleton,Skeleton Archer,Sky Drake,Soulless,Spearman,Spectre,Swordsman,Tabib,Tentacle of the Deep,Thief,Thug,Tineen,Transport Galleon,Trapper,Troll,Troll Hero,Troll Rocklobber,Troll Shaman,Troll Warrior,Troll Whelp,Vampire Bat,Walking Corpse,Water Serpent,White Mage,Wolf,Wolf Rider,Woodsman,Wose,Wraith,Yeti,Young Ogre"
+-- Leaving in Khalifate, they will be considered mainline if player has the add-on.
+cc["mainline_list"] = "Ancient Lich,Ancient Wose,Arch Mage,Arif,Armageddon Drake,Assassin,Bandit,Banebow,Batal,Blood Bat,Boat,Bone Shooter,Bowman,Cavalier,Cavalryman,Chocobone,Cuttle Fish,Dark Adept,Dark Sorcerer,Death Knight,Deathblade,Direwolf,Direwolf Rider,Dragoon,Drake Arbiter,Drake Blademaster,Drake Burner,Drake Clasher,Drake Enforcer,Drake Fighter,Drake Flameheart,Drake Flare,Drake Glider,Drake Thrasher,Drake Warden,Drake Warrior,Draug,Dread Bat,Duelist,Dwarvish Arcanister,Dwarvish Berserker,Dwarvish Dragonguard,Dwarvish Explorer,Dwarvish Fighter,Dwarvish Guardsman,Dwarvish Lord,Dwarvish Pathfinder,Dwarvish Runemaster,Dwarvish Runesmith,Dwarvish Scout,Dwarvish Sentinel,Dwarvish Stalwart,Dwarvish Steelclad,Dwarvish Thunderer,Dwarvish Thunderguard,Dwarvish Ulfserker,Elder Falcon,Elder Mage,Elder Wose,Elvish Archer,Elvish Avenger,Elvish Captain,Elvish Champion,Elvish Druid,Elvish Enchantress,Elvish Fighter,Elvish Hero,Elvish High Lord,Elvish Lady,Elvish Lord,Elvish Marksman,Elvish Marshal,Elvish Outrider,Elvish Ranger,Elvish Rider,Elvish Scout,Elvish Shaman,Elvish Sharpshooter,Elvish Shyde,Elvish Sorceress,Elvish Sylph,Falcon,Faris,Fencer,Fire Dragon,Fire Drake,Fire Guardian,Fog Clearer,Footpad,Fugitive,Galleon,General,Ghast,Ghazi,Ghost,Ghoul,Giant Mudcrawler,Giant Rat,Giant Scorpion,Giant Spider,Goblin Impaler,Goblin Knight,Goblin Pillager,Goblin Rouser,Goblin Spearman,Grand Knight,Grand Marshal,Great Mage,Great Troll,Great Wolf,Gryphon,Gryphon Master,Gryphon Rider,Hadaf,Hakim,Halberdier,Heavy Infantryman,Highwayman,Horseman,Huntsman,Hurricane Drake,Inferno Drake,Iron Mauler,Javelineer,Jawal,Jundi,Khaiyal,Khalid,Knight,Lancer,Lich,Lieutenant,Longbowman,Mage,Mage of Light,Master at Arms,Master Bowman,Mermaid Diviner,Mermaid Enchantress,Mermaid Initiate,Mermaid Priestess,Mermaid Siren,Merman Entangler,Merman Fighter,Merman Hoplite,Merman Hunter,Merman Javelineer,Merman Netcaster,Merman Spearman,Merman Triton,Merman Warrior,Mighwar,Monawish,Mudafi,Mudcrawler,Mufariq,Muharib,Naffat,Naga Fighter,Naga Myrmidon,Naga Warrior,Necromancer,Necrophage,Nightgaunt,Ogre,Orcish Archer,Orcish Assassin,Orcish Crossbowman,Orcish Grunt,Orcish Leader,Orcish Ruler,Orcish Slayer,Orcish Slurbow,Orcish Sovereign,Orcish Warlord,Orcish Warrior,Outlaw,Paladin,Peasant,Pikeman,Pirate Galleon,Poacher,Qanas,Qatif-al-nar,Rami,Ranger,Rasikh,Red Mage,Revenant,Rogue,Royal Guard,Royal Warrior,Ruffian,Saree,Saurian Ambusher,Saurian Augur,Saurian Flanker,Saurian Oracle,Saurian Skirmisher,Saurian Soothsayer,Sea Serpent,Sergeant,Shadow,Shock Trooper,Shuja,Silver Mage,Skeletal Dragon,Skeleton,Skeleton Archer,Sky Drake,Soulless,Spearman,Spectre,Swordsman,Tabib,Tentacle of the Deep,Thief,Thug,Tineen,Transport Galleon,Trapper,Troll,Troll Hero,Troll Rocklobber,Troll Shaman,Troll Warrior,Troll Whelp,Vampire Bat,Walking Corpse,Water Serpent,White Mage,Wolf,Wolf Rider,Woodsman,Wose,Wraith,Yeti,Young Ogre"
 
 ---------------- UTILS GENERAL USE ---------------------------------
 
@@ -1921,7 +1921,7 @@ function cc.trait_list()
 	-- start with making a table containing the global traits
 	local all_traits_t = cc.global_trait_array()
 	
-	-- add aged, feral, & loyal as none of the races in core cover them
+	-- add aged, feral, & loyal as none of the races in mainline cover them
 	-- #textdomain wesnoth-help
 	local _ = wesnoth.textdomain "wesnoth-help"
 	local trait_aged = { id="aged", male_name=_"aged", female_name=_"female^aged",
@@ -2402,11 +2402,11 @@ function cc.unit_filters()
 			end
 		elseif choice == 6 then -- Set
 			local answer = cc.get_user_choice({ speaker="narrator", message=_"Choose a set to filter for:" },
-				{ _"All", _"Core", _"Add-On" })
+				{ _"All", _"Mainline", _"Add-On" })
 			if     answer == 1 then
 				filter.set.id = "all"; filter.set.name = _"All"
 			elseif answer == 2 then
-				filter.set.id = "core"; filter.set.name = _"Core"
+				filter.set.id = "mainline"; filter.set.name = _"Mainline"
 			elseif answer == 3 then
 				filter.set.id = "add-on"; filter.set.name = _"Add-On"
 			end
@@ -2463,28 +2463,28 @@ function cc.run_filters(unit_types)
 	
     -- Unit Set Filter
     if set ~= "all" then
-        local core_units = cc.split(cc.core_list, ",")
-        if set == "core" then			
+        local mainline_units = cc.split(cc.mainline_list, ",")
+        if set == "mainline" then			
 			for i = #unit_types, 1, -1 do
-				local is_core = false
-				for j = 1, #core_units do
-                    if wesnoth.unit_types[unit_types[i]].id == core_units[j] then
-                        is_core = true; break
+				local is_mainline = false
+				for j = 1, #mainline_units do
+                    if wesnoth.unit_types[unit_types[i]].id == mainline_units[j] then
+                        is_mainline = true; break
                     end
 				end
-				if is_core == false then
+				if is_mainline == false then
 					table.remove(unit_types, i)
 				end
 			end
         elseif set == "add-on" then
 			for i = #unit_types, 1, -1 do
-				local is_core = false
-				for j = 1, #core_units do
-                    if wesnoth.unit_types[unit_types[i]].id == core_units[j] then
-                        is_core = true; break
+				local is_mainline = false
+				for j = 1, #mainline_units do
+                    if wesnoth.unit_types[unit_types[i]].id == mainline_units[j] then
+                        is_mainline = true; break
                     end
 				end
-				if is_core == true then
+				if is_mainline == true then
                     table.remove(unit_types, i)
                 end
 			end
