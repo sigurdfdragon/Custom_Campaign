@@ -115,13 +115,17 @@ function cc.set_global_variable(namespace, variable, to_global, side, bool)
 end
 
 function cc.get_unit_type_ids()
-	local unit_types = wesnoth.get_unit_type_ids()
+	local unit_types = {}
 	-- remove unit_types not intended to be listed	
-	for t = #unit_types, 1, -1 do
-        if wesnoth.unit_types[unit_types[t]].__cfg.do_not_list ~= nil then
-            table.remove(unit_types, t)
-        elseif wesnoth.unit_types[unit_types[t]].__cfg.hide_help ~= nil then
-            table.remove(unit_types, t)
+	for k,v in pairs(wesnoth.unit_types) do
+		local include_unit = true
+        if wesnoth.unit_types[k].__cfg.do_not_list ~= nil then
+            include_unit = false
+        elseif wesnoth.unit_types[k].__cfg.hide_help ~= nil then
+            include_unit = false
+		end
+		if include_unit == true then
+			table.insert(unit_types, v.id)
 		end
 	end
 	return unit_types
