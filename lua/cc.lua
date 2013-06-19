@@ -520,7 +520,7 @@ function cc.scenario_prestart()
 	 -- Prepare the map for running the main_menu
 	 -- Override lobby fog & shroud settings, Clear objectives, Disable other sides
 	wesnoth.set_variable("=this_will_prevent_loading", "_this_map_from_a_save")
-	-- This is checked for in cc.era_prestart()
+	-- This is checked for in cc.modification_prestart()
 	wesnoth.set_variable("cc_scenario", true)
 	
 	-- Make side 1 be human and disable other sides
