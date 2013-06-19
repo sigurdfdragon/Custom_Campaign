@@ -140,7 +140,11 @@ function cc.store_starting_sides()
 		-- get the leader for the side
 		local loc = wesnoth.get_starting_location(i)
 		local u = wesnoth.get_unit(loc[1], loc[2])
-		wesnoth.extract_unit(u)
+		if u == nil then -- protect against empty side
+			u = wesnoth.create_unit { type = "Custom Campaign Unit" }
+		else
+			wesnoth.extract_unit(u)
+		end
 		
 		-- get recruit & recruitment_pattern
 		local s = wesnoth.sides[i].__cfg
@@ -515,15 +519,14 @@ end
 function cc.scenario_prestart()
 	 -- Prepare the map for running the main_menu
 	 -- Override lobby fog & shroud settings, Clear objectives, Disable other sides
-	 -- TODO: If possible, replace warning about launching map with code that
-		   -- will make the player in control of side 1
 	wesnoth.set_variable("=this_will_prevent_loading", "_this_map_from_a_save")
 	-- This is checked for in cc.era_prestart()
 	wesnoth.set_variable("cc_scenario", true)
-
-	if wesnoth.sides[1].controller ~= "human" then
-		wml_actions.message({ speaker="narrator", message=_"This map must be launched with a human controller for side 1" })
-		return cc.endlevel()
+	
+	-- Make side 1 be human and disable other sides
+	wesnoth.sides[1].controller = "human"
+	for i = 2, 9 do
+		wml_actions.modify_side({ side=i, controller="null" })
 	end
 
 	cc.load_globals()
@@ -534,10 +537,6 @@ function cc.scenario_prestart()
 	wml_actions.set_recruit({ side="1", recruit="" })
 	wml_actions.modify_side({ side="1", controller="human", color="red", fog="no", shroud="no" })
 	wml_actions.objectives({ silent="yes" })
-	
-	for i = 2, 9 do
-		wml_actions.modify_side({ side=i, controller="null" })
-	end
 	
 	-- create the turn refresh event
 	-- prevent turn from advancing so save list isn't cluttered & gold kept constant
