@@ -1071,13 +1071,11 @@ function cc.view_entry(entry, caller, index)
 	wml_actions.event({ name="prerecruit", id="recruit", first_time_only="no",
 		{ "lua", { code = [[ local x,y = wesnoth.current.event_context.x1, wesnoth.current.event_context.y1
 							 local u = wesnoth.get_unit(x,y)
-							 wesnoth.extract_unit(u)
-							 wml_actions.gold({ side=1, amount=u.__cfg.cost }) ]] } } })
+							 wesnoth.extract_unit(u) ]] } } })
 	-- prerecall event - prevent recall and gold change
 	wml_actions.event({ name="prerecall", id="recall", first_time_only="no",
 		{ "lua", { code = [[ local x,y = wesnoth.current.event_context.x1, wesnoth.current.event_context.y1
-							 wesnoth.put_recall_unit(wesnoth.get_unit(x,y))
-							 wml_actions.gold({ side="1", amount=wesnoth.game_config.recall_cost }) ]] } } })
+							 wesnoth.put_recall_unit(wesnoth.get_unit(x,y)) ]] } } })
 	
 	-- unpack army, faction, or side
 	return cc.unpack_entry(entry, 1, "Leader")
@@ -1172,7 +1170,6 @@ function cc.edit_leader_end(caller, index)
 	local x,y = wesnoth.current.event_context.x1, wesnoth.current.event_context.y1
 	local u = wesnoth.get_unit(x,y)
 	wesnoth.extract_unit(u)
-	wml_actions.gold({ side=1, amount=u.__cfg.cost })
 	
 	local n = ""
 	if caller == "edit_army" or caller == "custom_army" then
@@ -1226,7 +1223,6 @@ function cc.edit_recruit_event_recruit()
 	local u = wesnoth.get_unit(x1, y1)
 	wesnoth.extract_unit(u)
 	u = wesnoth.create_unit({ type=u.type, generate_name="no", random_gender="no", random_traits="no" })
-	wml_actions.gold({ side=1, amount=u.__cfg.cost })
 
 	--check if unit is already on recall list
 	local list = wesnoth.get_recall_units({ side=1 })
@@ -1266,9 +1262,7 @@ function cc.edit_recruit(caller, index, entry)
 	wml_actions.event({ name="prerecall", id="recall", first_time_only="no",
 		{ "lua", { code = [[
 							local x,y = wesnoth.current.event_context.x1, wesnoth.current.event_context.y1
-							wesnoth.put_recall_unit(wesnoth.get_unit(x,y))
-							wml_actions.gold({ side="1", amount=wesnoth.game_config.recall_cost })
-						  ]] } } })
+							wesnoth.put_recall_unit(wesnoth.get_unit(x,y)) ]] } } })
 		
 	-- initilize recruit list to contain all possible units
 	local unit_types = cc.get_unit_type_ids()
@@ -1434,9 +1428,7 @@ function cc.edit_leader_recruit(caller, index, entry)
 	wml_actions.event({ name="prerecall", id="recall", first_time_only="no",
 		{ "lua", { code = [[
 							local x,y = wesnoth.current.event_context.x1, wesnoth.current.event_context.y1
-							wesnoth.put_recall_unit(wesnoth.get_unit(x,y))
-							wml_actions.gold({ side="1", amount=wesnoth.game_config.recall_cost })
-						  ]] } } })
+							wesnoth.put_recall_unit(wesnoth.get_unit(x,y)) ]] } } })
 		
 	-- initilize recruit list to contain all possible units
 	local unit_types = cc.get_unit_type_ids()
@@ -2317,7 +2309,6 @@ function cc.add_unit_to_recall_list()
 	local x,y = wesnoth.current.event_context.x1, wesnoth.current.event_context.y1
 	local u = wesnoth.get_unit(x,y)
 	wesnoth.extract_unit(u)
-	wml_actions.gold({ side=1, amount=u.__cfg.cost })
 	
 	u = cc.customize_unit(u)
 	wesnoth.put_recall_unit(u)
