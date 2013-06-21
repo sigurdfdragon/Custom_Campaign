@@ -1699,7 +1699,7 @@ function cc.edit_recall_list(index)
 		{ "command", { { "lua", { code="cc.edit_recall_list_end(" .. index .. ")" } } } } })
 	wml_actions.set_menu_item({ id=2, description=_"Edit Recall List Instructions",
 		{ "show_if", { } },
-		{ "command", { { "message", { speaker="narrator", message=_"Use Recruit to add a unit to the Recall List. Dismiss a unit from the Recall list to remove it. Recall a unit to edit things like name. Right-Click a unit on the map, and you can select a command to delete it." } } } } })
+		{ "command", { { "message", { speaker="narrator", message=_"Use Recruit to add a unit to the Recall List. Dismiss a unit from the Recall list to remove it. Recall a unit to edit things like name. Right-Click a unit on the map, and you can select a command to delete, copy or transfer it. Any copies or transfers to another army have an immediate effect on that army and are not subject to accepting or discarding the edits." } } } } })
 	wml_actions.set_menu_item({ id=3, description=_"Unit Filters",
 		{ "show_if", { } },
 		{ "command", { { "lua", { code="cc.unit_filters()" } } } } })
@@ -1712,6 +1712,9 @@ function cc.edit_recall_list(index)
 	wml_actions.set_menu_item({ id=6, description=_"Delete Unit",
 		{ "show_if", { { "have_unit", { x="$x1", y="$y1", { "not", { id="Commander" } } } } } },
 		{ "command", { { "lua", { code=[[wml_actions.kill({ x="$x1", y="$y1", animate="no", fire_event="no" })]] } } } } })
+	wml_actions.set_menu_item({ id=7, description=_"Copy or Transfer Unit",
+		{ "show_if", { { "have_unit", { x="$x1", y="$y1" } } } },
+		{ "command", { { "lua", { code="cc.edit_recall_list_copy_transfer()" } } } } })
 		
 	-- create recruit event
 	wml_actions.event({ name="prerecruit", id="recruit", first_time_only="no",
@@ -1737,6 +1740,51 @@ function cc.edit_recall_list_return_units()
 		cc.clear_ids(units[i])
 		units[i].moves = units[i].max_moves
 		wesnoth.put_recall_unit(units[i])
+	end
+end
+
+function cc.edit_recall_list_copy_transfer()
+	local x,y = wesnoth.current.event_context.x1, wesnoth.current.event_context.y1
+	local choices = { _"Copy", _"Copy to another Army", _"Transfer to another Army" }
+	if wesnoth.get_unit(x,y).id == "Commander" then
+		choices[3] = nil -- Prevent Commander from being transfered
+	end
+	local choice = cc.get_user_choice({ speaker="narrator", message=_"Choose option:"}, choices)
+
+	if choice == 1 then
+		-- ensure Commander status removed, copy unit to recall list
+		local u = wesnoth.copy_unit(wesnoth.get_unit(x,y))
+		u = u.__cfg ; u.id = nil
+		cc.clear_ids(u)
+		u = wesnoth.create_unit(u)
+		wesnoth.put_recall_unit(u)
+		-- if a Hero, Leader or Expendable Leader was copied, put unit back on the map
+		if u.__cfg.canrecruit == true or u.role == "Hero" then
+			local loc = wesnoth.get_starting_location(1)
+			wml_actions.recall({ x=loc[1], y=loc[2], id=u.id, show="no", fire_event="no" })
+		end
+	end
+	
+	if choice == 2 then
+		--  ensure Commander status removed, copy unit to chosen army
+		local u = wesnoth.copy_unit(wesnoth.get_unit(x,y))
+		u = u.__cfg ; u.id = nil
+		cc.clear_ids(u)
+		local choices = cc.army_display_list()
+		local index = cc.get_user_choice({ speaker="narrator", message=_"Select an Army to copy the unit to:" }, choices)
+		table.insert(army[index], { "recall_list", u })
+		-- need to make a function that cleans a unit wml, am repeating code otherwise.
+	end
+	
+	if choice == 3 then
+		-- transfer to another army's recall list, doesn't appear if unit is Commander
+		local u = wesnoth.get_unit(x,y)
+		wesnoth.extract_unit(u)
+		u = u.__cfg ; u.id = nil
+		cc.clear_ids(u)
+		local choices = cc.army_display_list()
+		local index = cc.get_user_choice({ speaker="narrator", message=_"Select an Army to transfer the unit to:" }, choices)
+		table.insert(army[index], { "recall_list", u })
 	end
 end
 
