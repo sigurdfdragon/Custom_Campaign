@@ -2165,8 +2165,10 @@ function cc.get_trait_choice(unit_type)
 	return chosen_traits
 end
 
-function cc.get_full_trait_choice(unit_type)
+function cc.get_full_trait_choice(unit_type, role)
 	-- Recieves a unit_type; Returns a sorted array of chosen traits
+	-- If unit has a role, remove loyal from choice,
+	-- and add or not add loyal trait depending on role
 	local traits = cc.trait_list()
 	local chosen_traits = {}
 	
@@ -2197,6 +2199,26 @@ function cc.get_full_trait_choice(unit_type)
 	-- let the player pick up to 5 times
 	trait_choices[0] = cc.end_button()
 	local count = 0
+	
+	if role then
+		-- automatically remove loyal trait from selection
+		local answer
+		for i = 1, #traits do
+			if traits[i].id == "loyal" then
+				answer = i ; break
+			end
+		end
+		local selected_trait = table.remove(traits, answer)
+		table.remove(trait_choices, answer)
+		if role == "Hero" then -- give trait & increment counter
+			table.insert(chosen_traits, selected_trait )
+			count = count + 1
+		else
+			-- is Leader or Expendable Leader,
+			-- don't add trait, would be redundant
+		end
+	end
+	
 	repeat
 		local answer = cc.get_user_choice({ speaker="narrator", message="Select up to 5 traits for this unit. Choose End when you are done." }, trait_choices, 0)
 		if answer ~= 0 then
@@ -2316,37 +2338,36 @@ function cc.customize_unit(u, leader)
 			end
 		end
 	elseif answer == 4 or leader then
-		-- menu for chosen gender, variation, and up to any 5 traits.
+		-- menu for chosen gender, variation, and up to 5 traits.
 		local id -- kept nil unless making a Commander
 		local role -- kept nil, unless making a Leader, Expendable Leader, or Hero
-		local g = cc.get_gender_choice(ut)
-		local v = cc.get_variation_choice(ut)
-		local t = cc.get_full_trait_choice(ut)
-		local n = cc_get_name_choice(ut, g)
-		-- check if loyal was chosen, if so, add loyal icon
-		local loyal = helper.get_child(t, "trait", "loyal")
-		local overlay
-		if loyal then
-			overlay = "misc/loyal-icon.png"
-		end
-		
+		local overlay -- kept nil, unless making a Hero, Expendable Leader, or Loyal unit
 		if leader then
 			id = "Commander"
 			role = "Leader"
 		else
-			local choice = cc.get_user_choice({ speaker="narrator", message=_"Would you like to make this unit special?" },
-				{ _"No", _"Hero", _"Leader", _"Expendable Leader" })
+			local choice = cc.get_user_choice({ speaker="narrator", message=_"What kind of unit would you like?" },
+				{ _"Normal", _"Hero", _"Leader", _"Expendable Leader" })
 			if choice == 2 then
-				overlay = "misc/hero-icon.png"
 				role = "Hero"
+				overlay = "misc/hero-icon.png"
 			elseif choice == 3 then
 				leader = true
 				role = "Leader"
 			elseif choice == 4 then
 				leader = true
-				overlay = "misc/leader-expendable.png"
 				role = "Expendable Leader"
+				overlay = "misc/leader-expendable.png"
 			end
+		end
+		local g = cc.get_gender_choice(ut)
+		local v = cc.get_variation_choice(ut)
+		local t = cc.get_full_trait_choice(ut, role)
+		local n = cc_get_name_choice(ut, g)
+		-- check if loyal was chosen, if so, add loyal icon
+		local loyal = helper.get_child(t, "trait", "loyal")
+		if loyal and not role then
+			overlay = "misc/loyal-icon.png"
 		end
 		u = wesnoth.create_unit({ type=ut, id=id, canrecruit=leader, name=n, gender=g, random_traits="no", variation=v, overlays=overlay, role=role, { "modifications", t } })
 	end
