@@ -519,9 +519,9 @@ end
 function cc.scenario_prestart()
 	 -- Prepare the map for running the main_menu
 	 -- Override lobby fog & shroud settings, Clear objectives, Disable other sides
-	wesnoth.set_variable("=this_will_prevent_loading", "_this_map_from_a_save")
+	wesnoth.set_variable("custom_campaign.=this_will_prevent_loading", "_this_map_from_a_save")
 	-- This is checked for in cc.modification_prestart()
-	wesnoth.set_variable("cc_scenario", true)
+	wesnoth.set_variable("custom_campaign.scenario", true)
 	
 	-- Make side 1 be human and disable other sides
 	wesnoth.sides[1].controller = "human"
@@ -557,10 +557,10 @@ end
 -- let player select factions for AI sides.
 function cc.modification_prestart()
 	-- Not used, but could be checked for by scenarios
-	wesnoth.set_variable("cc_modification", true)
+	wesnoth.set_variable("custom_campaign.modification", true)
 	
 	-- disable modification functionality if launched with Custom Campaign Map
-	if wesnoth.get_variable("cc_scenario") == true then
+	if wesnoth.get_variable("custom_campaign.scenario") == true then
 		return
 	end
 	
@@ -640,9 +640,9 @@ function cc.modification_prestart()
 						c = c + 1
 					end
 				end
-				wml_actions.store_turns( { variable="cc_turn_limit" } )
+				wml_actions.store_turns( { variable="custom_campaign.turn_limit" } )
 				objectives[c] = { "objective", { condition="lose", show_turn_counter="yes", description=_"Turns run out",
-					{ "show_if", { { "variable", { name="cc_turn_limit", not_equals="-1" } } } }   } }
+					{ "show_if", { { "variable", { name="custom_campaign.turn_limit", not_equals="-1" } } } }   } }
 				wml_actions.objectives(objectives)
 			elseif choice == 2 then
 				local list = cc.faction_display_list()
@@ -737,7 +737,7 @@ end
 
 function cc.modification_die()
 	-- disable modification functionality if launched with Custom Campaign Map
-	if wesnoth.get_variable("cc_scenario") == true then
+	if wesnoth.get_variable("custom_campaign.scenario") == true then
 		return
 	end
 	-- 1. Check if a Leader or Hero has died. If so, end the level in defeat.
@@ -769,7 +769,7 @@ end
 
 function cc.modification_start()
 	-- disable modification functionality if launched with Custom Campaign Map
-	if wesnoth.get_variable("cc_scenario") == true then
+	if wesnoth.get_variable("custom_campaign.scenario") == true then
 		return
 	end
 	wml_actions.message({ id="Commander", message=_"To arms!" })
@@ -779,7 +779,7 @@ end
 
 function cc.modification_enemies_defeated()
 	-- disable modification functionality if launched with Custom Campaign Map
-	if wesnoth.get_variable("cc_scenario") == true then
+	if wesnoth.get_variable("custom_campaign.scenario") == true then
 		return
 	end
 	wml_actions.message({ id="Commander", message=_"Victory!" })
