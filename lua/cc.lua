@@ -669,6 +669,11 @@ end
 ------------------ MODIFICATION VICTORY --------------------
 
 function cc.modification_victory()
+	-- disable functionality if launched with Random Campaign
+	if wesnoth.get_variable("random_campaign.campaign") == true then
+		return
+	end
+
 	-- retrieve the chosen_army wml_var
 	local chosen_army = wesnoth.get_variable("cc_chosen_army")
 	
