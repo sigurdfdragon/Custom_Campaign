@@ -262,7 +262,7 @@ function cc.unpack_entry(entry, side, name)
 			local function unit_value_sort(u1, u2)				
 				if u1.__cfg.upkeep == u2.__cfg.upkeep then
 					if u1.__cfg.level == u2.__cfg.level then
-						return u1.max_experience - u1.experience < u2.max_experience - u2.experiencu
+						return u1.max_experience - u1.experience < u2.max_experience - u2.experience
 					else
 						return u1.__cfg.level > u2.__cfg.level
 					end
