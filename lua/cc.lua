@@ -669,6 +669,11 @@ end
 ------------------ MODIFICATION VICTORY --------------------
 
 function cc.modification_victory()
+	-- disable modification functionality if launched with Custom Campaign Map
+	if wesnoth.get_variable("custom_campaign.scenario") == true then
+		return
+	end
+
 	-- disable functionality if launched with Random Campaign
 	if wesnoth.get_variable("random_campaign.campaign") == true then
 		return
@@ -676,10 +681,6 @@ function cc.modification_victory()
 
 	-- retrieve the chosen_army wml_var
 	local chosen_army = wesnoth.get_variable("cc_chosen_army")
-	
-	if chosen_army == nil then
-		return
-	end
 			
 	-- Take all units and dump their wml into an array
 	local units = {}
