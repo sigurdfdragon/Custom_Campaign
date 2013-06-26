@@ -653,7 +653,7 @@ function cc.modification_prestart()
 		elseif v.controller == "null" then
 			-- player wants to use a custom faction for this side or leave it empty.
 			local list = cc.faction_display_list()
-			list[0] = "Leave Side Empty"
+			list[0] = "&misc/blank-hex.png=" .. _"Leave Side Empty"
 			local index = cc.get_user_choice({ speaker="narrator", message=_"Choose a faction for side " .. v.side .. " (" .. v.gold .. " Gold, " .. v.base_income .. " Income)" }, list, 0)
 			if index ~= 0 then
 				v.controller = "ai"
