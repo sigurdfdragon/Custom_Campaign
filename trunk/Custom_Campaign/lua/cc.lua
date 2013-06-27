@@ -514,6 +514,40 @@ function cc.leader_display_list(index)
 	return t
 end
 
+function cc.set_objectives(side)
+	local objectives = { side=side }
+	local c = 1
+	local units = wesnoth.get_units({ side=side })
+	objectives[c] = { "objective", { condition="win", description=_"Defeat enemy leader(s)" } }
+	c = c + 1
+	for u = 1, #units do
+		if units[u].id == "Commander" and units[u].role == "Leader" then
+			objectives[c] = { "objective", { condition="lose", description=_"Death of " .. units[u].name } }
+			c = c + 1
+		end
+	end
+	for u = 1, #units do
+		if units[u].role == "Leader" and units[u].id ~= "Commander" then
+			objectives[c] = { "objective", { condition="lose", description=_"Death of " .. units[u].name } }
+			c = c + 1
+		end
+	end
+	if c == 2 then -- All leaders are expendable, therefore use this objective
+		objectives[c] = { "objective", { condition="lose", description=_"Death of your leader(s)" } }
+		c = c + 1
+	end
+	for u = 1, #units do
+		if  units[u].role == "Hero" then
+			objectives[c] = { "objective", { condition="lose", description=_"Death of " .. units[u].name } }
+			c = c + 1
+		end
+	end
+	wml_actions.store_turns( { variable="custom_campaign.turn_limit" } )
+	objectives[c] = { "objective", { condition="lose", show_turn_counter="yes", description=_"Turns run out",
+		{ "show_if", { { "variable", { name="custom_campaign.turn_limit", not_equals="-1" } } } }   } }
+	wml_actions.objectives(objectives)
+end
+
 ----------------- SCENARIO PRESTART -----------------
 
 function cc.scenario_prestart()
@@ -614,37 +648,7 @@ function cc.modification_prestart()
 				-- place into wml_var so it can be saved and used in victory event
 				wesnoth.set_variable("cc_chosen_army", chosen_army)
 				
-				-- set objectives
-				local objectives = { side=v.side }
-				local c = 1
-				objectives[c] = { "objective", { condition="win", description=_"Defeat enemy leader(s)" } }
-				c = c + 1
-				for u in helper.child_range(army[index], "recall_list") do
-					if u.id == "Commander" and u.role == "Leader" then
-						objectives[c] = { "objective", { condition="lose", description=_"Death of " .. u.name } }
-						c = c + 1
-					end
-				end
-				for u in helper.child_range(army[index], "recall_list") do
-					if u.role == "Leader" and u.id ~= "Commander" then
-						objectives[c] = { "objective", { condition="lose", description=_"Death of " .. u.name } }
-						c = c + 1
-					end
-				end
-				if c == 2 then -- All leaders are expendable, therefore use this objective
-					objectives[c] = { "objective", { condition="lose", description=_"Death of your leader(s)" } }
-					c = c + 1
-				end
-				for u in helper.child_range(army[index], "recall_list") do
-					if  u.role == "Hero" then
-						objectives[c] = { "objective", { condition="lose", description=_"Death of " .. u.name } }
-						c = c + 1
-					end
-				end
-				wml_actions.store_turns( { variable="custom_campaign.turn_limit" } )
-				objectives[c] = { "objective", { condition="lose", show_turn_counter="yes", description=_"Turns run out",
-					{ "show_if", { { "variable", { name="custom_campaign.turn_limit", not_equals="-1" } } } }   } }
-				wml_actions.objectives(objectives)
+				cc.set_objectives(v.side)
 			elseif choice == 2 then
 				local list = cc.faction_display_list()
 				local index = cc.get_user_choice({ speaker="narrator", message=_"Choose your faction for side " .. v.side }, list)
