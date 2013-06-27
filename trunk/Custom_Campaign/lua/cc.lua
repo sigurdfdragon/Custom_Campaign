@@ -515,6 +515,21 @@ function cc.leader_display_list(index)
 end
 
 function cc.set_objectives(side)
+	-- check for default objectives
+	local str = tostring(wesnoth.sides[side].objectives)
+	local dummy, count
+	local t = { "<big>", "</big>", "<span foreground=”#00ff00”>&#8226;", "</span>" }
+	-- default objectives use each string only once.
+	for i = 1, #t do
+		dummy, count = string.gsub(str, t[i], t[i])
+		if count > 1 then
+			-- scenario or era has it's own objectives
+			-- don't overwrite them with Custom Campagin objectives
+			return
+		end
+	end
+	
+	-- replace default objectives with Custom Campaign objectives
 	local objectives = { side=side }
 	local c = 1
 	local units = wesnoth.get_units({ side=side })
