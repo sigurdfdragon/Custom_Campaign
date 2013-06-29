@@ -525,6 +525,9 @@ function cc.set_objectives(side)
 		if count > 1 then
 			-- scenario or era has it's own objectives
 			-- don't overwrite them with Custom Campagin objectives
+			-- also, set survival to false, don't override scenario
+			-- designer's intentions.
+			wesnoth.set_variable("custom_campaign.survival", false)
 			return
 		end
 	end
@@ -533,33 +536,56 @@ function cc.set_objectives(side)
 	local objectives = { side=side }
 	local c = 1
 	local units = wesnoth.get_units({ side=side })
+	
 	objectives[c] = { "objective", { condition="win", description=_"Defeat enemy leader(s)" } }
 	c = c + 1
+		
+	local leaders
 	for u = 1, #units do
-		if units[u].id == "Commander" and units[u].role == "Leader" then
-			objectives[c] = { "objective", { condition="lose", description=_"Death of " .. units[u].name } }
-			c = c + 1
+		-- see if there are only Expendable Leaders
+		if units[u].role == "Leader" then
+			leaders = true
 		end
 	end
-	for u = 1, #units do
-		if units[u].role == "Leader" and units[u].id ~= "Commander" then
-			objectives[c] = { "objective", { condition="lose", description=_"Death of " .. units[u].name } }
-			c = c + 1
+	if leaders then
+		for u = 1, #units do
+			if units[u].id == "Commander" and units[u].role == "Leader" then
+				objectives[c] = { "objective", { condition="lose", description=_"Death of " .. units[u].name } }
+				c = c + 1
+			end
 		end
-	end
-	if c == 2 then -- All leaders are expendable, therefore use this objective
+		for u = 1, #units do
+			if units[u].role == "Leader" and units[u].id ~= "Commander" then
+				objectives[c] = { "objective", { condition="lose", description=_"Death of " .. units[u].name } }
+				c = c + 1
+			end
+		end
+	else
+		-- All leaders are expendable, therefore use this objective
 		objectives[c] = { "objective", { condition="lose", description=_"Death of your leader(s)" } }
 		c = c + 1
 	end
+	
 	for u = 1, #units do
 		if  units[u].role == "Hero" then
 			objectives[c] = { "objective", { condition="lose", description=_"Death of " .. units[u].name } }
 			c = c + 1
 		end
 	end
+	
 	wml_actions.store_turns( { variable="custom_campaign.turn_limit" } )
-	objectives[c] = { "objective", { condition="lose", show_turn_counter="yes", description=_"Turns run out",
-		{ "show_if", { { "variable", { name="custom_campaign.turn_limit", not_equals="-1" } } } }   } }
+	if wesnoth.get_variable("custom_campaign.turn_limit") == -1 or
+		wesnoth.get_variable("random_campaign.campaign") then
+		wesnoth.set_variable("custom_campaign.survival"), false)
+	end
+	if wesnoth.get_variable("custom_campaign.survival") then
+		objectives[c] = { "objective", { condition="win", show_turn_counter="yes", description=_"Survive until the end of turns",
+			{ "show_if", { { "variable", { name="custom_campaign.turn_limit", not_equals="-1" } } } }   } }
+	else
+		objectives[c] = { "objective", { condition="lose", show_turn_counter="yes", description=_"Turns run out",
+			{ "show_if", { { "variable", { name="custom_campaign.turn_limit", not_equals="-1" } } } }   } }
+	end
+	
 	wml_actions.objectives(objectives)
 end
 
@@ -683,6 +709,18 @@ function cc.modification_prestart()
 
 	-- clear global vars in lua
 	army, faction, id = nil, nil, nil
+end
+
+------------------ MODIFICATION TIME OVER -------------------
+
+function cc.modification_time_over()
+	-- disable modification functionality if launched with Custom Campaign Map
+	if wesnoth.get_variable("custom_campaign.scenario") == true then
+		return
+	end
+	if wesnoth.get_variable("custom_campaign.survival") == true then
+		wml_actions.endlevel({ result=victory })
+	end
 end
 
 ------------------ MODIFICATION VICTORY --------------------
