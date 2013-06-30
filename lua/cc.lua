@@ -576,7 +576,7 @@ function cc.set_objectives(side)
 	wml_actions.store_turns( { variable="custom_campaign.turn_limit" } )
 	if wesnoth.get_variable("custom_campaign.turn_limit") == -1 or
 		wesnoth.get_variable("random_campaign.campaign") then
-		wesnoth.set_variable("custom_campaign.survival"), false)
+		wesnoth.set_variable("custom_campaign.survival", false)
 	end
 	if wesnoth.get_variable("custom_campaign.survival") then
 		objectives[c] = { "objective", { condition="win", show_turn_counter="yes", description=_"Survive until the end of turns",
