@@ -585,6 +585,12 @@ function cc.set_objectives(side)
 		objectives[c] = { "objective", { condition="lose", show_turn_counter="yes", description=_"Turns run out",
 			{ "show_if", { { "variable", { name="custom_campaign.turn_limit", not_equals="-1" } } } }   } }
 	end
+	c = c + 1
+	
+	if wesnoth.get_variable("custom_campaign.waves") then
+		local wf = wesnoth.get_variable("custom_campaign.wave_frequency")
+		objectives[c] = { "note", { description=_"The enemy will send a wave of troops every " .. wf .. " turns." } }
+	end
 	
 	wml_actions.objectives(objectives)
 end
@@ -709,6 +715,42 @@ function cc.modification_prestart()
 
 	-- clear global vars in lua
 	army, faction, id = nil, nil, nil
+end
+
+------------------ MODIFICATION NEW TURN --------------------
+
+function cc.modification_new_turn()
+	-- disable modification functionality if launched with Custom Campaign Map
+	if wesnoth.get_variable("custom_campaign.scenario") == true then
+		return
+	end
+	if not wesnoth.get_variable("custom_campaign.waves") then
+	    return
+    end
+
+	-- on turn one, store each side's starting gold.
+	if wesnoth.current.turn == 1 then
+		wml_actions.store_side({ variable="sides" })
+	end
+	
+	-- every wave_frequency turns, add starting gold to each enemy side
+	local turn_number = wesnoth.current.turn
+	local wave_frequency = wesnoth.get_variable("custom_campaign.wave_frequency")
+	local side = wesnoth.get_sides()
+	local side_start = helper.get_variable_array("sides")
+	local player_team
+	for i = 1, #side do
+		if side[i].controller == "human" then
+			player_team = side[i].team_name
+		end
+	end
+	if (turn_number - 1) % wave_frequency == 0 and turn_number ~= 1 then
+		for i = 1, #side do
+			if side[i].team_name ~= player_team then
+				side[i].gold = side[i].gold + side_start[i].gold
+			end
+		end
+	end	
 end
 
 ------------------ MODIFICATION TIME OVER -------------------
