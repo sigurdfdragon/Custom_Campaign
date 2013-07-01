@@ -663,13 +663,18 @@ function cc.modification_prestart()
 	sides = nil
 	
 	-- disable modification if player hasn't made any armies
+	-- or has chosen to use a faction & doesn't have one
 	cc.load_globals()
 	if next(army) == nil then
 		wml_actions.message({ speaker="narrator", message=_"You need at least one army to play. Create it at the Custom Campaign Map." })
 		return cc.endlevel()
 	end
+	if next(faction) == nil and wesnoth.get_variable("custom_campaign.use_faction") then
+		wml_actions.message({ speaker="narrator", message=_"You need at least one faction to play. Create it at the Custom Campaign Map." })
+		return cc.endlevel()
+	end
 		
-	-- Show choice of army menu or faction menu for human side,
+	-- Show army menu or faction menu for human side,
 	-- present option of leave side empty or faction choice for each null side,
 	-- and leave ai sides alone.
 	-- check based on side.controller
@@ -678,9 +683,8 @@ function cc.modification_prestart()
 		if v.controller == "human" then
 			-- kill existing leader to be replaced
 			wml_actions.kill({ side=v.side, canrecruit="yes", animate="no", fire_event="no" })
-			-- give choice between army or faction
-			local choice = cc.get_user_choice({ speaker="narrator", message=_"Would you like to play an Army (saved on victory) or a Faction (not saved) for side " .. v.side .."?" }, { _"Army", _"Faction" })
-			if choice == 1 then
+			-- load army or faction choice based on option
+			if not wesnoth.get_variable("custom_campaign.use_faction") then
 				local list = cc.army_display_list()
 				local index = cc.get_user_choice({ speaker="narrator", message=_"Select your army for side " .. v.side }, list)
 				cc.unpack_entry(army[index], v.side)
@@ -696,7 +700,7 @@ function cc.modification_prestart()
 				wesnoth.set_variable("cc_chosen_army", chosen_army)
 				
 				cc.set_objectives(v.side)
-			elseif choice == 2 then
+			else
 				local list = cc.faction_display_list()
 				local index = cc.get_user_choice({ speaker="narrator", message=_"Choose your faction for side " .. v.side }, list)
 				cc.unpack_entry(faction[index], v.side)
