@@ -665,7 +665,7 @@ function cc.modification_prestart()
 	-- disable modification if player hasn't made any armies
 	-- or has chosen to use a faction & doesn't have one
 	cc.load_globals()
-	if next(army) == nil then
+	if next(army) == nil and not wesnoth.get_variable("custom_campaign.use_faction") then
 		wml_actions.message({ speaker="narrator", message=_"You need at least one army to play. Create it at the Custom Campaign Map." })
 		return cc.endlevel()
 	end
