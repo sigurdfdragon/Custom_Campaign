@@ -177,19 +177,21 @@ function cc.store_starting_sides()
 	end
 end
 
-function cc.load_globals()
-	army = cc.get_global_array("SigurdFireDragon_Custom_Campaign", "army", 1)
-	faction = cc.get_global_array("SigurdFireDragon_Custom_Campaign", "faction", 1)
-	id_counter = cc.get_global_variable("SigurdFireDragon_Custom_Campaign", "id_counter", 1)
+function cc.load_globals(side)
+	local side = side or 1
+	army = cc.get_global_array("SigurdFireDragon_Custom_Campaign", "army", side)
+	faction = cc.get_global_array("SigurdFireDragon_Custom_Campaign", "faction", side)
+	id_counter = cc.get_global_variable("SigurdFireDragon_Custom_Campaign", "id_counter", side)
 	if id_counter == nil or id_counter == "" then
 		id_counter = 0
 	end -- nil or "" causes errors in incrementing the counter
 end
 
-function cc.save_globals()
-	cc.set_global_array("SigurdFireDragon_Custom_Campaign", army, "army", 1, false)
-	cc.set_global_array("SigurdFireDragon_Custom_Campaign", faction, "faction", 1, false)
-	cc.set_global_variable("SigurdFireDragon_Custom_Campaign", id_counter, "id_counter", 1, false)
+function cc.save_globals(side)
+	local side = side or 1
+	cc.set_global_array("SigurdFireDragon_Custom_Campaign", army, "army", side, false)
+	cc.set_global_array("SigurdFireDragon_Custom_Campaign", faction, "faction", side, false)
+	cc.set_global_variable("SigurdFireDragon_Custom_Campaign", id_counter, "id_counter", side, false)
 end
 
 function cc.endlevel()
@@ -721,6 +723,52 @@ function cc.modification_prestart()
 	army, faction, id = nil, nil, nil
 end
 
+------------------ MODIFICATION MP PRESTART -----------------
+
+function cc.modification_mp_prestart()
+	-- Not used, but could be checked for by scenarios
+	wesnoth.set_variable("custom_campaign.modification", true)
+	
+	-- disable modification functionality if launched with Custom Campaign Map
+	if wesnoth.get_variable("custom_campaign.scenario") == true then
+		return
+	end
+	
+	if wesnoth.current.turn ~= 1 then
+		return
+	end
+
+	local chosen_army
+	local side = wesnoth.current.side
+	cc.load_globals(side)
+	if next(army) ~= nil then
+		local list = cc.army_display_list()
+		list[0] = "&misc/blank-hex.png=" .. _"Don't choose an army."
+		local index = cc.get_user_choice({ speaker="narrator", message=_"Select your army:" }, list, 0)
+		if index ~= 0 then
+			chosen_army = cc.deep_copy(army[index])
+		end
+	end
+	
+	if chosen_army then
+		chosen_army.side = side
+		-- kill existing leader to be replaced
+		wml_actions.kill({ side=side, canrecruit="yes", animate="no", fire_event="no" })
+		cc.unpack_entry(chosen_army, side)
+		-- clear recall_list
+		for i = 1, #chosen_army do
+			chosen_army[i] = nil
+		end
+		-- place into wml_var so it can be saved and used in victory event
+		wesnoth.set_variable("cc_chosen_army" .. side, chosen_army)
+		
+		-- cc.set_objectives(side)
+	end
+
+	-- clear global vars in lua
+	army, faction, id = nil, nil, nil
+end
+
 ------------------ MODIFICATION NEW TURN --------------------
 
 function cc.modification_new_turn()
@@ -841,6 +889,98 @@ function cc.modification_victory()
 	end
 	table.sort(army, cc.name_sort)
 	cc.save_globals()
+end
+
+------------------ MODIFICATION MP VICTORY --------------------
+
+function cc.modification_mp_victory()
+	-- runs in event enemies defeated
+	-- disable modification functionality if launched with Custom Campaign Map
+	if wesnoth.get_variable("custom_campaign.scenario") == true then
+		return
+	end
+
+	-- disable functionality if launched with Random Campaign
+	if wesnoth.get_variable("random_campaign.campaign") == true then
+		return
+	end
+
+	local side = wesnoth.get_sides()
+	for x = 1, #side do
+		-- check on controller value? yes, really!
+		if side[x].controller == "human" then
+		-- retrieve the chosen_army wml_var
+		local chosen_army = wesnoth.get_variable("cc_chosen_army" .. x)
+			if chosen_army then	
+				-- Take all units and dump their wml into an array
+				local units = {}
+				for i,u in ipairs(wesnoth.get_recall_units({ side=chosen_army.side })) do
+					table.insert(units, u.__cfg)
+				end
+				for i,u in ipairs(wesnoth.get_units({ side=chosen_army.side })) do
+					table.insert(units, u.__cfg)
+				end
+
+				-- if side doesn't have a commander, don't save army
+				local has_commander = false
+				for u = 1, #units do
+					if units[u].id == "Commander" then
+						has_commander = true
+						break
+					end
+				end
+				if has_commander then
+					-- Heal, Clear Status, Reset attacks and move, set side to 1
+					-- This (hopefully) replicates everything that is done to restore a unit
+					-- upon victory. Must do it this way, as storing units occurs before
+					-- the victory restoring of all the players units.
+					for u = 1, #units do
+						cc.clear_ids(units[u])
+						units[u].hitpoints = units[u].max_hitpoints
+						units[u].moves = units[u].max_moves
+						units[u].attacks_left = units[u].max_attacks
+						units[u].goto_x = 0; units[u].goto_y = 0
+						units[u].side = 1
+						for tag = #units[u], 1, -1 do
+							-- do it this way so it'll get recreated when it is unpacked again,
+							-- thus handling any custom status from add-ons
+							if units[u][tag][1] == "status" then
+								table.remove(units[u], tag)
+							end
+						end
+					end
+					
+					chosen_army.side = nil
+
+					-- add the unit list to the chosen_army table
+					for u = 1, #units do
+						chosen_army[u] = { "recall_list", units[u] }
+					end
+
+					chosen_army.victories = chosen_army.victories + 1
+					chosen_army.last_victory = os.date()
+					
+					cc.load_globals(x)
+					local index
+					-- Find the proper index from the unique id
+					for i, v in ipairs(army) do
+						if v.id == chosen_army.id then
+							index = i; break
+						end
+					end
+					-- if index is still nil, that means player is necroing a deleted army,
+					-- so add it at the end of the army array
+					if index then
+						army[index] = chosen_army
+					else
+						table.insert(army, chosen_army)
+					end
+					table.sort(army, cc.name_sort)
+					cc.save_globals(x)
+				end
+			end
+		end
+	end
 end
 
 ----------------- MODIFICATION DIE -------------------
