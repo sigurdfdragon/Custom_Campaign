@@ -278,6 +278,14 @@ function cc.unpack_entry(entry, side, name)
 				wml_actions.recall({ x=loc[1], y=loc[2], id=id, show="no", fire_event="no" })
 			end
 		end
+		
+		-- set flag
+		entry.flag = entry.flag or "default"
+		if entry.flag == "default" then
+			wml_actions.modify_side({ side=side, flag="flags/flag-[1~4].png:150", flag_icon="flags/flag-icon.png" })
+		else
+			wml_actions.modify_side({ side=side, flag="flags/" .. entry.flag .. "-flag-[1~4].png:150", flag_icon="flags/" .. entry.flag .. "-flag-icon.png" })
+		end
 	else -- faction and side stuff
 		local loc = wesnoth.get_starting_location(side)
 		-- check for missing unit
@@ -1163,24 +1171,35 @@ end
 function cc.army_options(index)
 	-- Displays the selected army with options for editing it.
 	-- index is the location of the choosen army in the army array
+	
+	-- set the army's flag
+	if army[index].flag == nil or army[index].flag == "default" then
+		wml_actions.modify_side({ side=1, flag_icon="flags/flag-icon.png" })
+	else
+		wml_actions.modify_side({ side=1, flag_icon="flags/" .. army[index].flag .. "-flag-icon.png" })
+	end
+	
 	local msg = cc.army_display_list()
 	local answer = 0
 	repeat
 		answer = cc.get_user_choice({ speaker="narrator", message="" },
-			{ [0]=msg[index], cc.back_button(), _"View Army", _"Rename Army", _"Change Commander", _"Edit Recall List",
+			{ [0]=msg[index], cc.back_button(), _"View Army", _"Rename Army", _"Change Flag", _"Change Commander", _"Edit Recall List",
 			_"Edit Starting Recall", _"Edit Recruit", _"Edit Recruitment Pattern", _"Edit Leader Recruit & Recall", _"Instructions", _"Delete Army" }, 0)
 	until  answer ~= 0
-	if     answer == 1 then return cc.army_list()
+	if     answer == 1 then -- restore default flag
+		wml_actions.modify_side({ side=1, flag_icon="flags/flag-icon.png" })
+		return cc.army_list()
 	elseif answer == 2 then return cc.view_entry(army[index], "army", index)
 	elseif answer == 3 then return cc.rename_entry("edit_army", index, army[index])
-	elseif answer == 4 then return cc.change_main_leader(index)
-	elseif answer == 5 then return cc.edit_recall_list(index)
-	elseif answer == 6 then return cc.edit_starting_recall(index)
-	elseif answer == 7 then return cc.edit_recruit("edit_army", index, army[index])
-	elseif answer == 8 then return cc.edit_recruitment_pattern("edit_army", index, army[index])
-	elseif answer == 9 then return cc.edit_leader_recruit("unused_param", index, army[index])
-	elseif answer == 10 then return cc.army_instructions(index)
-	elseif answer == 11 then return cc.delete_entry("edit_army", index)
+	elseif answer == 4 then return cc.change_flag(index)
+	elseif answer == 5 then return cc.change_main_leader(index)
+	elseif answer == 6 then return cc.edit_recall_list(index)
+	elseif answer == 7 then return cc.edit_starting_recall(index)
+	elseif answer == 8 then return cc.edit_recruit("edit_army", index, army[index])
+	elseif answer == 9 then return cc.edit_recruitment_pattern("edit_army", index, army[index])
+	elseif answer == 10 then return cc.edit_leader_recruit("unused_param", index, army[index])
+	elseif answer == 11 then return cc.army_instructions(index)
+	elseif answer == 12 then return cc.delete_entry("edit_army", index)
 	end
 end
 
@@ -2089,6 +2108,26 @@ function cc.edit_recall_list_end(index)
 	end
 end
 
+----------------- CHANGE FLAG -----------------------------------
+
+function cc.change_flag(index)
+	local list = {}
+	local flags = { [0]="default", "knalgan", "long", "loyalist", "ragged", "undead", "wood-elvish" }
+	-- TODO: Change flags to red when I figure out how. ~RC(magenta>red)= doesn't work.
+	list[0] = "&flags/" .. "flag-icon.png~RC(magenta>red)="
+	for i = 1, #flags do
+		list[i] = "&flags/" .. flags[i] .. "-flag-icon.png~RC(magenta>red)="
+	end
+	local choice = cc.get_user_choice({ speaker="narrator", message=_"Choose your flag:"}, list, 0)
+	if choice == 0 then
+		wml_actions.modify_side({ side=1, flag_icon="flags/flag-icon.png" })
+	else
+		wml_actions.modify_side({ side=1, flag_icon="flags/" .. flags[choice] .. "-flag-icon.png" })
+	end
+	army[index].flag = flags[choice]
+	return cc.army_options(index)
+end
+
 ----------------- CHANGE MAIN LEADER ---------------------------
 
 function cc.change_main_leader(index)
@@ -2101,7 +2140,6 @@ function cc.change_main_leader(index)
 	army[index][choice][2].id = "Commander"
 	return cc.army_options(index)
 end
-
 
 ----------------- EDIT STARTING RECALL --------------------------
 
