@@ -1192,7 +1192,7 @@ function cc.army_options(index)
 	elseif answer == 2 then return cc.view_entry(army[index], "army", index)
 	elseif answer == 3 then return cc.rename_entry("edit_army", index, army[index])
 	elseif answer == 4 then return cc.change_flag(index)
-	elseif answer == 5 then return cc.change_main_leader(index)
+	elseif answer == 5 then return cc.change_commander(index)
 	elseif answer == 6 then return cc.edit_recall_list(index)
 	elseif answer == 7 then return cc.edit_starting_recall(index)
 	elseif answer == 8 then return cc.edit_recruit("edit_army", index, army[index])
@@ -2128,11 +2128,11 @@ function cc.change_flag(index)
 	return cc.army_options(index)
 end
 
------------------ CHANGE MAIN LEADER ---------------------------
+----------------- CHANGE COMMANDER ------------------------------
 
-function cc.change_main_leader(index)
+function cc.change_commander(index)
 	local options = cc.leader_display_list(index)
-	-- calling leader display sorts the units so the leaders are on top, with main leader first
+	-- calling leader display sorts the units so the leaders are on top, with commander first
 	-- thus we can use the integer from player's choice to make the needed change
 	-- clear current designation of Commander
 	army[index][1][2].id = nil
