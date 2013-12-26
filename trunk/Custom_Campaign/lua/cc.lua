@@ -656,6 +656,11 @@ function cc.modification_prestart()
 		return
 	end
 	
+	-- disable modification functionality during Random Campaign
+	if wesnoth.get_variable("random_campaign.custom_campaign") == true then
+		return
+	end
+	
 	-- disable modification if human sides > 1
 	local humans = 0
 	local sides = wesnoth.get_sides()
@@ -1030,6 +1035,10 @@ function cc.modification_start()
 	if wesnoth.get_variable("custom_campaign.scenario") == true then
 		return
 	end
+	-- disable modification functionality during Random Campaign
+	if wesnoth.get_variable("random_campaign.custom_campaign") == true then
+		return
+	end
 	wml_actions.message({ id="Commander", message=_"To arms!" })
 end
 
@@ -1038,6 +1047,10 @@ end
 function cc.modification_enemies_defeated()
 	-- disable modification functionality if launched with Custom Campaign Map
 	if wesnoth.get_variable("custom_campaign.scenario") == true then
+		return
+	end
+	-- disable modification functionality during Random Campaign
+	if wesnoth.get_variable("random_campaign.custom_campaign") == true then
 		return
 	end
 	wml_actions.message({ id="Commander", message=_"Victory!" })
