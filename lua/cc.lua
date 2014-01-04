@@ -2641,6 +2641,7 @@ function cc.customize_unit(u, leader)
 	elseif answer == 4 or leader then
 		-- menu for chosen gender, variation, and up to 5 traits.
 		local id -- kept nil unless making a Commander
+		local ellipse -- kept nil, unless making a Hero
 		local role -- kept nil, unless making a Leader, Expendable Leader, or Hero
 		local overlay -- kept nil, unless making a Hero, Expendable Leader, or Loyal unit
 		if leader then
@@ -2650,6 +2651,7 @@ function cc.customize_unit(u, leader)
 			local choice = cc.get_user_choice({ speaker="narrator", message=_"What kind of unit would you like?" },
 				{ _"Normal", _"Hero", _"Leader", _"Expendable Leader" })
 			if choice == 2 then
+				ellipse = "misc/ellipse-hero"
 				role = "Hero"
 				overlay = "misc/hero-icon.png"
 			elseif choice == 3 then
@@ -2670,7 +2672,7 @@ function cc.customize_unit(u, leader)
 		if loyal and not role then
 			overlay = "misc/loyal-icon.png"
 		end
-		u = wesnoth.create_unit({ type=ut, id=id, canrecruit=leader, name=n, gender=g, random_traits="no", variation=v, overlays=overlay, role=role, { "modifications", t } })
+		u = wesnoth.create_unit({ type=ut, id=id, canrecruit=leader, name=n, gender=g, random_traits="no", variation=v, ellipse=ellipse, overlays=overlay, role=role, { "modifications", t } })
 	end
 	return u
 end
