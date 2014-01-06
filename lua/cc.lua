@@ -280,12 +280,9 @@ function cc.unpack_entry(entry, side, name)
 		end
 		
 		-- set flag
-		entry.flag = entry.flag or "default"
-		if entry.flag == "default" then
-			wml_actions.modify_side({ side=side, flag="flags/flag-[1~4].png:150", flag_icon="flags/flag-icon.png" })
-		else
-			wml_actions.modify_side({ side=side, flag="flags/" .. entry.flag .. "-flag-[1~4].png:150", flag_icon="flags/" .. entry.flag .. "-flag-icon.png" })
-		end
+		entry.flag = entry.flag or ""
+		entry.flag_icon = entry.flag_icon or ""
+		wml_actions.modify_side({ side=side, flag=entry.flag, flag_icon=entry.flag_icon })
 	else -- faction and side stuff
 		local loc = wesnoth.get_starting_location(side)
 		-- check for missing unit
@@ -1186,11 +1183,7 @@ function cc.army_options(index)
 	-- index is the location of the choosen army in the army array
 	
 	-- set the army's flag
-	if army[index].flag == nil or army[index].flag == "default" then
-		wml_actions.modify_side({ side=1, flag_icon="flags/flag-icon.png" })
-	else
-		wml_actions.modify_side({ side=1, flag_icon="flags/" .. army[index].flag .. "-flag-icon.png" })
-	end
+	wml_actions.modify_side({ side=1, flag_icon=army[index].flag_icon })
 	
 	local msg = cc.army_display_list()
 	local answer = 0
@@ -2125,19 +2118,20 @@ end
 
 function cc.change_flag(index)
 	local list = {}
-	local flags = { [0]="default", "knalgan", "long", "loyalist", "ragged", "undead", "wood-elvish" }
+	local flag = { "flags/flag-[1~4].png:150", "flags/knalgan-flag-[1~4].png:150",
+		"flags/long-flag-[1~4].png:150", "flags/loyalist-flag-[1~4].png:150", "flags/ragged-flag-[1~4].png:150",
+		"flags/undead-flag-[1~4].png:150", "flags/wood-elvish-flag-[1~4].png:150" }
+	local flag_icon = { "flags/flag-icon.png", "flags/knalgan-flag-icon.png",
+		"flags/long-flag-icon.png", "flags/loyalist-flag-icon.png", "flags/ragged-flag-icon.png",
+		"flags/undead-flag-icon.png", "flags/wood-elvish-flag-icon.png" }
 	-- TODO: Change flags to red when I figure out how. ~RC(magenta>red)= doesn't work.
-	list[0] = "&flags/" .. "flag-icon.png~RC(magenta>red)="
-	for i = 1, #flags do
-		list[i] = "&flags/" .. flags[i] .. "-flag-icon.png~RC(magenta>red)="
+	for i = 1, #flag_icon do
+		list[i] = "&" .. flag_icon[i] .. "="
 	end
-	local choice = cc.get_user_choice({ speaker="narrator", message=_"Choose your flag:"}, list, 0)
-	if choice == 0 then
-		wml_actions.modify_side({ side=1, flag_icon="flags/flag-icon.png" })
-	else
-		wml_actions.modify_side({ side=1, flag_icon="flags/" .. flags[choice] .. "-flag-icon.png" })
-	end
-	army[index].flag = flags[choice]
+	local choice = cc.get_user_choice({ speaker="narrator", message=_"Choose your flag:"}, list)
+	wml_actions.modify_side({ side=1, flag_icon=flag_icon[choice] })
+	army[index].flag = flag[choice]
+	army[index].flag_icon = flag_icon[choice]
 	return cc.army_options(index)
 end
 
