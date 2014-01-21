@@ -2272,14 +2272,12 @@ function cc.trait_list()
 	-- #textdomain wesnoth-Custom_Campaign
 	_ = wesnoth.textdomain "wesnoth-Custom_Campaign"
 	-- add heroic trait (Props to the World Conquest add-on for the idea.)
-	-- This version is different in that it does not have loyal
-	-- and that it has dexterous.
+	-- This is The Great Quest version that has strong, resilent, quick & dexterous.
 	local trait_heroic = { id="heroic", male_name=_"heroic", female_name=_"female^heroic",
 		{ "effect", { apply_to="attack", increase_damage=1 } },
 		{ "effect", { apply_to="hitpoints", increase_total=5 } },
 		{ "effect", { apply_to="hitpoints", times="per level", increase_total=1 } },
-		{ "effect", { apply_to="movement", increase=1 } },
-		{ "effect", { apply_to="max_experience", increase="-20%" } } }
+		{ "effect", { apply_to="movement", increase=1 } } }
 	-- add powerful trait
 	local trait_powerful = { id="powerful", male_name=_"powerful", female_name=_"female^powerful",
 		{ "effect", { apply_to="attack", increase_damage="20%" } } }
