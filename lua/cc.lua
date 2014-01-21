@@ -2280,15 +2280,15 @@ function cc.trait_list()
 		{ "effect", { apply_to="hitpoints", times="per level", increase_total=1 } },
 		{ "effect", { apply_to="movement", increase=1 } },
 		{ "effect", { apply_to="max_experience", increase="-20%" } } }
-	-- add skillful trait
-	local trait_skillful = { id="skillful", male_name=_"skillful", female_name=_"female^skillful",
+	-- add powerful trait
+	local trait_powerful = { id="powerful", male_name=_"powerful", female_name=_"female^powerful",
 		{ "effect", { apply_to="attack", increase_damage="20%" } } }
 	_ = nil
 	table.insert(all_traits_t, trait_aged)
 	table.insert(all_traits_t, trait_feral)
 	table.insert(all_traits_t, trait_loyal)
 	table.insert(all_traits_t, trait_heroic)
-	table.insert(all_traits_t, trait_skillful)
+	table.insert(all_traits_t, trait_powerful)
 	
 	-- traverse through all the races and add traits by id that are not already present
 	for k,v in pairs(wesnoth.races) do
