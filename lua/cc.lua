@@ -434,7 +434,7 @@ function cc.army_display_list()
 
 
 		d.name = army[i].name
-		d.units = #army[i] - 1 -- subtract for primary leader
+		d.units = #army[i]
 		d.last_victory = army[i].last_victory
 		d.recruit = cc.recruit_translate(army[i].recruit)
 		d.recruitment_pattern = army[i].recruitment_pattern
@@ -525,7 +525,7 @@ function cc.mod_army_display(color)
 
 			d.flag_icon = army[i].flag_icon or ""
 			d.name = army[i].name
-			d.units = #army[i] - 1 -- subtract for primary leader
+			d.units = #army[i]
 			d.last_victory = army[i].last_victory
 			d.recruit = cc.recruit_translate(army[i].recruit)
 			d.recruitment_pattern = army[i].recruitment_pattern
