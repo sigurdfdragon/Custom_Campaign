@@ -456,6 +456,112 @@ function cc.army_display_list()
 	return t
 end
 
+function cc.mod_army_display(color)
+	-- recieves a color for the menu
+	-- copies data from @army and places it into proper format for a lua menu
+	-- no nill values should be in the army array
+	local T = helper.set_wml_tag_metatable {}
+	local dialog = {
+	  T.tooltip { id = "tooltip_large" },
+	  T.helptip { id = "tooltip_large" },
+	  T.grid { T.row {
+		T.column { T.grid {
+		  T.row { T.column { horizontal_grow = true, T.listbox { id = "the_list",
+			T.header { T.row { T.column { horizontal_alignment = "center", T.label { id = "list_header" } } },
+				T.column { horizontal_alignment = "center", T.spacer { width = 5 } }
+			},
+			T.list_definition { T.row { T.column { horizontal_alignment = "left",
+			  T.toggle_panel { T.grid { horizontal_alignment = "left", T.row {
+				T.column { horizontal_alignment = "left", T.image { id = "commander_icon" } },
+				T.column { horizontal_alignment = "left",
+				  T.grid {
+					T.row { 
+						T.column { horizontal_alignment = "left", T.grid {
+							T.row {
+								T.column { horizontal_alignment = "left", T.image { id = "army_flag" } },
+								T.column { horizontal_alignment = "left", T.label { id = "army_name" } }
+							}
+						} }
+					},
+					T.row {
+						T.column { horizontal_alignment = "left", T.label { id = "commander_info" } },
+					},
+					T.row {
+						T.column { horizontal_alignment = "left", T.label { id = "army_info" } }, 
+					},
+					T.row {
+						T.column { horizontal_alignment = "left", T.label { id = "victories" } } 
+					}
+				  }
+				},
+				T.column { horizontal_alignment = "center", T.spacer { width = 5 } },
+			  } } }
+			} } }
+		  } } },
+		  T.row { T.column { T.grid { T.row {
+			T.column { T.button { id = "ok", label = _"OK" } }
+		  } } } }
+		} }
+	  } } 
+	}
+
+	local function preshow()
+		local function select()
+		end
+		wesnoth.set_dialog_callback(select, "the_list")
+		for i,val in ipairs(army) do
+			local d = {}
+			-- get leader info
+			local u = helper.get_child(army[i], "recall_list", "Commander")
+			if wesnoth.unit_types[u.type] ~= nil then
+				d.image = u.image
+				d.language_name = u.language_name
+				d.leader_name = u.name
+			else
+				d.image = "units/unknown-unit.png"
+				d.language_name = "----------"
+				d.leader_name = u.name
+			end
+
+			d.flag_icon = army[i].flag_icon or ""
+			d.name = army[i].name
+			d.units = #army[i] - 1 -- subtract for primary leader
+			d.last_victory = army[i].last_victory
+			d.recruit = cc.recruit_translate(army[i].recruit)
+			d.recruitment_pattern = army[i].recruitment_pattern
+			if army[i].starting_recall == -1 then
+				d.starting_recall = _"Loyal"
+			else
+				d.starting_recall = army[i].starting_recall
+			end
+			d.victories = army[i].victories
+
+			wesnoth.set_dialog_value(d.image .. "~RC(magenta>" .. color .. ")", "the_list", i, "commander_icon")
+			wesnoth.set_dialog_value(d.flag_icon .. "~RC(flag_green>" .. color ..")", "the_list", i, "army_flag")
+			wesnoth.set_dialog_value(d.name, "the_list", i, "army_name")
+			wesnoth.set_dialog_value("<small>" .. _"Commander: " .. d.leader_name .. ", " .. d.language_name .. "</small>", "the_list", i, "commander_info")
+			wesnoth.set_dialog_value("<small>" .. _"Units: " .. d.units .. _"  Starting Recall: " .. d.starting_recall .. "</small>", "the_list", i, "army_info")
+			wesnoth.set_dialog_value("<small>" .. _"Victories: " .. d.victories .. _"  Last Victory: " .. d.last_victory .. "</small>", "the_list", i, "victories")
+			wesnoth.set_dialog_markup(true, "the_list", i, "army_name")
+			wesnoth.set_dialog_markup(true, "the_list", i, "commander_info")
+			wesnoth.set_dialog_markup(true, "the_list", i, "army_info")
+			wesnoth.set_dialog_markup(true, "the_list", i, "victories")
+		end
+		wesnoth.set_dialog_value("<big>" .. _"Select your army:" .. "</big>", "list_header")
+		wesnoth.set_dialog_markup(true, "list_header")
+		wesnoth.set_dialog_value(1, "the_list")
+		select()
+	end
+
+	local li = 0
+	local function postshow()
+		li = wesnoth.get_dialog_value("the_list")
+	end
+
+	local r = wesnoth.show_dialog(dialog, preshow, postshow)
+	return li
+end
+
 function cc.leader_display_list(index)
 	-- Recieves an index in the army array
 	-- Returns a table to display the leaders for army[index]
@@ -697,8 +803,7 @@ function cc.modification_prestart()
 			wml_actions.kill({ side=v.side, canrecruit="yes", animate="no", fire_event="no" })
 			-- load army or faction choice based on option
 			if not wesnoth.get_variable("custom_campaign.use_faction") then
-				local list = cc.army_display_list()
-				local index = cc.get_user_choice({ speaker="narrator", message=_"Select your army for side " .. v.side }, list)
+				local index = cc.mod_army_display(v.color)
 				cc.unpack_entry(army[index], v.side)
 				
 				-- make copy to place into wml_var
@@ -755,6 +860,9 @@ function cc.modification_mp_prestart()
 		local list = cc.army_display_list()
 		list[0] = "&misc/blank-hex.png=" .. _"Don't choose an army."
 		local index = cc.get_user_choice({ speaker="narrator", message=_"Select your army:" }, list, 0)
+		-- Code is not yet working, not sure why. error of 'Attempt to call a table value when synchronize choice finishes running.
+		-- local t = wesnoth.synchronize_choice(cc.mod_army_display(wesnoth.sides[side].color), function() return { return_value = 0 } end)
+		-- local index = t.return_value
 		if index ~= 0 then
 			chosen_army = cc.deep_copy(army[index])
 		end
