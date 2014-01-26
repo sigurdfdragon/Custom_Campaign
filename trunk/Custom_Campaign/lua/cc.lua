@@ -2232,9 +2232,8 @@ function cc.change_flag(index)
 	local flag_icon = { "flags/flag-icon.png", "flags/knalgan-flag-icon.png",
 		"flags/long-flag-icon.png", "flags/loyalist-flag-icon.png", "flags/ragged-flag-icon.png",
 		"flags/undead-flag-icon.png", "flags/wood-elvish-flag-icon.png" }
-	-- TODO: Change flags to red when I figure out how. ~RC(magenta>red)= doesn't work.
 	for i = 1, #flag_icon do
-		list[i] = "&" .. flag_icon[i] .. "="
+		list[i] = "&" .. flag_icon[i] .. "~RC(flag_green>red)="
 	end
 	local choice = cc.get_user_choice({ speaker="narrator", message=_"Choose your flag:"}, list)
 	wml_actions.modify_side({ side=1, flag_icon=flag_icon[choice] })
