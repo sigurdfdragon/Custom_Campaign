@@ -456,10 +456,11 @@ function cc.army_display_list()
 	return t
 end
 
-function cc.mod_army_display(color)
-	-- recieves a color for the menu
+function cc.mod_army_display()
 	-- copies data from @army and places it into proper format for a lua menu
 	-- no nill values should be in the army array
+	-- returns a wml table for wesnoth.synchronize_choice compatability
+	local color = wesnoth.sides[wesnoth.current.side].color
 	local T = helper.set_wml_tag_metatable {}
 	local dialog = {
 	  T.tooltip { id = "tooltip_large" },
@@ -559,7 +560,7 @@ function cc.mod_army_display(color)
 	end
 
 	local r = wesnoth.show_dialog(dialog, preshow, postshow)
-	return li
+	return { return_value = li }
 end
 
 function cc.leader_display_list(index)
@@ -803,7 +804,8 @@ function cc.modification_prestart()
 			wml_actions.kill({ side=v.side, canrecruit="yes", animate="no", fire_event="no" })
 			-- load army or faction choice based on option
 			if not wesnoth.get_variable("custom_campaign.use_faction") then
-				local index = cc.mod_army_display(v.color)
+				local t = cc.mod_army_display()
+				local index = t.return_value
 				cc.unpack_entry(army[index], v.side)
 				
 				-- make copy to place into wml_var
@@ -857,12 +859,8 @@ function cc.modification_mp_prestart()
 	local side = wesnoth.current.side
 	cc.load_globals(side)
 	if next(army) ~= nil then
-		local list = cc.army_display_list()
-		list[0] = "&misc/blank-hex.png=" .. _"Don't choose an army."
-		local index = cc.get_user_choice({ speaker="narrator", message=_"Select your army:" }, list, 0)
-		-- Code is not yet working, not sure why. error of 'Attempt to call a table value when synchronize choice finishes running.
-		-- local t = wesnoth.synchronize_choice(cc.mod_army_display(wesnoth.sides[side].color), function() return { return_value = 0 } end)
-		-- local index = t.return_value
+		local t = wesnoth.synchronize_choice(cc.mod_army_display, function() return { return_value = 0 } end)
+		local index = t.return_value
 		if index ~= 0 then
 			chosen_army = cc.deep_copy(army[index])
 		end
