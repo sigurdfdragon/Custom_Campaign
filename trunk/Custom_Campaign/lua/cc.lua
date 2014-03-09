@@ -761,7 +761,7 @@ function cc.modification_prestart()
 	end
 	
 	-- disable modification functionality during Random Campaign
-	if wesnoth.get_variable("random_campaign.custom_campaign") == true then
+	if wesnoth.get_variable("random_campaign.campaign") == true then
 		return
 	end
 	
@@ -1139,7 +1139,7 @@ function cc.modification_start()
 		return
 	end
 	-- disable modification functionality during Random Campaign
-	if wesnoth.get_variable("random_campaign.custom_campaign") == true then
+	if wesnoth.get_variable("random_campaign.campaign") == true then
 		return
 	end
 	wml_actions.message({ id="Commander", message=_"To arms!" })
@@ -1153,7 +1153,7 @@ function cc.modification_enemies_defeated()
 		return
 	end
 	-- disable modification functionality during Random Campaign
-	if wesnoth.get_variable("random_campaign.custom_campaign") == true then
+	if wesnoth.get_variable("random_campaign.campaign") == true then
 		return
 	end
 	wml_actions.message({ id="Commander", message=_"Victory!" })
