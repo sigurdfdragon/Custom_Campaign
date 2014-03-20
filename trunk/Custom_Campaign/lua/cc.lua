@@ -1339,7 +1339,8 @@ end
 
 function cc.create_custom_army()
 	id_counter = id_counter + 1
-	custom = { id = id_counter, name = "", recruit = "", recruitment_pattern = "", starting_recall = 0, victories = 0, last_victory = ""}
+	custom = { id = id_counter, name = "", flag = "flags/flag-[1~4].png:150", flag_icon = "flags/flag-icon.png",
+		recruit = "", recruitment_pattern = "", starting_recall = 0, victories = 0, last_victory = ""}
 	-- launch a chain of functions: edit_leader(), edit_recruit(), edit_recruitment_pattern(), rename_entry()
 	return cc.edit_leader("custom_army")
 end
@@ -1368,6 +1369,8 @@ function cc.create_army_from_entry(t)
 	
 	id_counter = id_counter + 1
 	new.id = id_counter
+	new.flag = "flags/flag-[1~4].png:150"
+	new.flag_icon = "flags/flag-icon.png"
 	new.recruit = t[choice].recruit or ""
 	new.recruitment_pattern = t[choice].recruitment_pattern or ""
 	new.starting_recall = 0
