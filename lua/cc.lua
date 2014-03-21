@@ -892,6 +892,10 @@ function cc.modification_new_turn()
 	if wesnoth.get_variable("custom_campaign.scenario") == true then
 		return
 	end
+	-- disable modification functionality during Random Campaign
+	if wesnoth.get_variable("random_campaign.campaign") == true then
+		return
+	end
 	if not wesnoth.get_variable("custom_campaign.waves") then
 	    return
     end
@@ -926,6 +930,10 @@ end
 function cc.modification_time_over()
 	-- disable modification functionality if launched with Custom Campaign Map
 	if wesnoth.get_variable("custom_campaign.scenario") == true then
+		return
+	end
+	-- disable modification functionality during Random Campaign
+	if wesnoth.get_variable("random_campaign.campaign") == true then
 		return
 	end
 	if wesnoth.get_variable("custom_campaign.survival") == true then
