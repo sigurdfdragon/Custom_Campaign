@@ -1119,7 +1119,7 @@ function cc.modification_die()
 	   -- b. End the level.
 	local u = wesnoth.get_variable("unit")
 	if u.role == "Leader" or u.role == "Hero" then
-		wml_actions.endlevel({ result="defeat" })
+		wml_actions.endlevel({ result="defeat", reveal_map="no" })
 	end
 	-- 2. If an Expendable Leader that is the Commander has died, try to reassign Commander status to
 	   -- first to another Expendable Leader, second to a Leader. (just get the first one that matches the filter
@@ -1135,6 +1135,9 @@ function cc.modification_die()
 			new.id = "Commander"
 			wesnoth.extract_unit(leaders[1])
 			wesnoth.put_unit(new)
+		else
+			-- if we cannot reassign commander, that means there are no leaders left.
+			wml_actions.endlevel({ result="defeat", reveal_map="no" })
 		end
 	end
 end
