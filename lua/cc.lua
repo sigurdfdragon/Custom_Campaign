@@ -391,6 +391,93 @@ function cc.faction_display_list()
 	return t
 end
 
+function cc.mod_faction_display(v)
+	-- recieves a single wesnoth.sides[] table
+	-- copies data from @faction and places it into proper format for a lua menu
+	-- no nill values should be in the faction array
+	-- returns a wml table for wesnoth.synchronize_choice compatability
+	local color = wesnoth.sides[v.side].color
+	local T = helper.set_wml_tag_metatable {}
+	local dialog = {
+	  T.tooltip { id = "tooltip_large" },
+	  T.helptip { id = "tooltip_large" },
+	  T.grid { T.row {
+		T.column { T.grid {
+		  T.row { T.column { horizontal_grow = true, T.listbox { id = "the_list",
+			T.header { T.row { T.column { horizontal_alignment = "center", T.label { id = "list_header" } } },
+				T.column { horizontal_alignment = "center", T.spacer { width = 5 } }
+			},
+			T.list_definition { T.row { T.column { horizontal_alignment = "left",
+			  T.toggle_panel { T.grid { horizontal_alignment = "left", T.row {
+				T.column { horizontal_alignment = "left", T.image { id = "commander_icon" } },
+				T.column { horizontal_alignment = "left",
+				  T.grid {
+					T.row { 
+						T.column { horizontal_alignment = "left", T.grid {
+							T.row {
+								T.column { horizontal_alignment = "left", T.label { id = "faction_name" } }
+							}
+						} }
+					},
+					T.row {
+						T.column { horizontal_alignment = "left", T.label { id = "commander_info" } },
+					}
+				  }
+				},
+				T.column { horizontal_alignment = "center", T.spacer { width = 5 } },
+			  } } }
+			} } }
+		  } } },
+		  T.row { T.column { T.grid { T.row {
+			T.column { T.button { id = "ok", label = _"OK" } }
+		  } } } }
+		} }
+	  } } 
+	}
+
+	local function preshow()
+		local function select()
+		end
+		wesnoth.set_dialog_callback(select, "the_list")
+		for i,val in ipairs(faction) do
+			local d = {}
+			-- get leader info
+			if wesnoth.unit_types[faction[i].leader] == nil then
+				d.image = "units/unknown-unit.png"
+				d.leader = "----------"
+			else
+				d.image = faction[i].image
+				-- get gender correct name
+				local u = wesnoth.create_unit({ type=faction[i].leader, gender=faction[i].gender })
+				d.leader_name = u.__cfg.language_name
+			end
+			d.name = faction[i].name
+
+			wesnoth.set_dialog_value(d.image .. "~RC(magenta>" .. color .. ")", "the_list", i, "commander_icon")
+			wesnoth.set_dialog_value(d.name, "the_list", i, "faction_name")
+			wesnoth.set_dialog_value("<small>" .. _"Leader: " .. d.leader_name .. "</small>", "the_list", i, "commander_info")
+			wesnoth.set_dialog_markup(true, "the_list", i, "faction_name")
+			wesnoth.set_dialog_markup(true, "the_list", i, "commander_info")
+		end
+		if v.controller == "human" and v.name == v.__cfg.current_player then
+			wesnoth.set_dialog_value("<big>" .. _"Select your faction for side " .. v.side .. ":" .. "</big>", "list_header")
+		else
+			wesnoth.set_dialog_value("<big>" .. _"Choose a faction for side " .. v.side .. " (" .. v.gold .. " Gold, " .. v.base_income .. " Income)" .. "</big>", "list_header")
+		end
+		wesnoth.set_dialog_markup(true, "list_header")
+		wesnoth.set_dialog_value(1, "the_list")
+		select()
+	end
+
+	local li = 0
+	local function postshow()
+		li = wesnoth.get_dialog_value("the_list")
+	end
+
+	local r = wesnoth.show_dialog(dialog, preshow, postshow)
+	return { return_value = li }
+end
+
 function cc.side_display_list()
 	local t = {}
 	
@@ -748,9 +835,9 @@ end
 ------------------ MODIFICATION PRESTART --------------------
 
 -- look through all sides on map
--- let player choose an army for a human controlled side (player may want to play as a side other than 1)
--- display warning if player launched the map with more than 1 human controlled side and quit
--- let player select factions for AI sides.
+-- let player choose an army for a named human controlled side (player may want to play as a side other than 1)
+-- display warning if player launched the map with incorrect side setup and quit
+-- let player select custom factions for 'Local Player' sides and switch them to ai controlled.
 function cc.modification_prestart()
 	-- Not used, but could be checked for by scenarios
 	wesnoth.set_variable("custom_campaign.modification", true)
@@ -765,21 +852,33 @@ function cc.modification_prestart()
 		return
 	end
 	
-	-- disable modification if human sides > 1
-	local humans = 0
+	-- disable modification if network game
 	local sides = wesnoth.get_sides()
 	for i,v in ipairs(sides) do
-		if v.controller == "human" then
-			humans = humans + 1
+		if v.controller == "network" or v.controller == "network_ai" then
+			wml_actions.message({ speaker="narrator", message=_"This mod is only for a one player local game. For network play, use the Custom Cmapaign MP mod." })
+			return cc.endlevel()	
 		end
 	end
-	if humans > 1 then
-		wml_actions.message({ speaker="narrator", message=_"You must have no more that one human controlled side to play Custom Campagin." })
+	sides = nil
+
+	-- disable modification if named player sides > 1
+	-- A named player is a human side that is not a 'Local Player'
+	-- For a named human player name and current_player values of side are identical
+	local named_players = 0
+	local sides = wesnoth.get_sides()
+	for i,v in ipairs(sides) do
+		if v.controller == "human" and v.name == v.__cfg.current_player then
+			named_players = named_players + 1
+		end
+	end
+	if named_players > 1 then
+		wml_actions.message({ speaker="narrator", message=_"You must have no more that one named human controlled side to play Custom Campagin." })
 		return cc.endlevel()	
 	elseif humans == 0 then
 		-- player is just watching computer play itself
 	end
-	sides = nil
+	sides, named_players = nil, nil
 	
 	-- disable modification if player hasn't made any armies
 	-- or has chosen to use a faction & doesn't have one
@@ -792,14 +891,30 @@ function cc.modification_prestart()
 		wml_actions.message({ speaker="narrator", message=_"You need at least one faction to play. Create it at the Custom Campaign Map." })
 		return cc.endlevel()
 	end
-		
-	-- Show army menu or faction menu for human side,
-	-- present option of leave side empty or faction choice for each null side,
-	-- and leave ai sides alone.
-	-- check based on side.controller
+	-- Here we look for number of 'Local Player'
+	-- For a human 'Local Player' name and current_player values of side are different.
+	-- if the number is greater than zero and player hasn't made a custom faction
+	-- disable the modification.
+	local non_players = 0
 	local sides = wesnoth.get_sides()
 	for i,v in ipairs(sides) do
-		if v.controller == "human" then
+		if v.controller == "human" and v.name ~= v.__cfg.current_player then
+			non_players = non_players + 1
+		end
+	end
+	if next(faction) == nil and non_players > 0 then
+		wml_actions.message({ speaker="narrator", message=_"You need at least one faction to play. Create it at the Custom Campaign Map." })
+		return cc.endlevel()
+	end
+	sides, non_players = nil, nil
+		
+	-- Show army menu or faction menu for named human side,
+	-- present option of faction choice for each unnamed human side ('Local Player'),
+	-- and leave ai and empty sides alone.
+	-- check based on side controller, name & current player values
+	local sides = wesnoth.get_sides()
+	for i,v in ipairs(sides) do
+		if v.controller == "human" and  v.name == v.__cfg.current_player then
 			-- kill existing leader to be replaced
 			wml_actions.kill({ side=v.side, canrecruit="yes", animate="no", fire_event="no" })
 			-- load army or faction choice based on option
@@ -820,19 +935,16 @@ function cc.modification_prestart()
 				
 				cc.set_objectives(v.side)
 			else
-				local list = cc.faction_display_list()
-				local index = cc.get_user_choice({ speaker="narrator", message=_"Choose your faction for side " .. v.side }, list)
+				local t = cc.mod_faction_display(v)
+				local index = t.return_value
 				cc.unpack_entry(faction[index], v.side)
 			end
-		elseif v.controller == "null" then
-			-- player wants to use a custom faction for this side or leave it empty.
-			local list = cc.faction_display_list()
-			list[0] = "&misc/blank-hex.png=" .. _"Leave Side Empty"
-			local index = cc.get_user_choice({ speaker="narrator", message=_"Choose a faction for side " .. v.side .. " (" .. v.gold .. " Gold, " .. v.base_income .. " Income)" }, list, 0)
-			if index ~= 0 then
-				v.controller = "ai"
-				cc.unpack_entry(faction[index], v.side)
-			end
+		elseif v.controller == "human" and  v.name ~= v.__cfg.current_player then
+			-- player wants to use a custom faction for this side.
+			local t = cc.mod_faction_display(v)
+			local index = t.return_value
+			v.controller = "ai"
+			cc.unpack_entry(faction[index], v.side)
 		end
 	end
 
