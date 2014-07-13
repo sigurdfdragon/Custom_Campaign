@@ -805,10 +805,10 @@ function cc.scenario_prestart()
 	-- This is checked for in cc.modification_prestart()
 	wesnoth.set_variable("custom_campaign.scenario", true)
 	
-	-- Make side 1 be human and disable other sides
+	-- Make side 1 be human and disable & hide other sides
 	wesnoth.sides[1].controller = "human"
 	for i = 2, 9 do
-		wml_actions.modify_side({ side=i, controller="null" })
+		wml_actions.modify_side({ side=i, controller="null", hidden=true })
 	end
 
 	cc.load_globals()
