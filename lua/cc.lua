@@ -2826,7 +2826,12 @@ function cc.get_variation_choice(unit_type)
 	local v_choice = {}
 	local i = 1
 	for v in helper.child_range(wesnoth.unit_types[unit_type].__cfg, "variation") do
-		v_choice[i] = v.variation_name
+		-- type check added to adjust for 5e4554f333d8b068f8f973a2567fbe848c8d53c4 in 1.12.1 fixing a bug
+		if type(v.variation_name) == "string" then
+			v_choice[i] = v.variation_name
+		elseif type(v.variation_id) == "string" then
+			v_choice[i] = v.variation_id
+		end
 		i = i + 1
 	end
 	
