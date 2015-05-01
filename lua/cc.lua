@@ -273,7 +273,13 @@ function cc.unpack_entry(entry, side, name)
 				end
 			end
 			table.sort(recall_list, unit_value_sort)
-			for u = 1, entry.starting_recall do
+			local recall_amount
+			if entry.starting_recall > #recall_list then
+			  recall_amount = #recall_list
+			else
+			  recall_amount = entry.starting_recall
+			end
+			for u = 1, recall_amount do
 				local id = recall_list[u].id
 				wml_actions.recall({ x=loc[1], y=loc[2], id=id, show="no", fire_event="no" })
 			end
