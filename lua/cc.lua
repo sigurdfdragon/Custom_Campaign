@@ -136,7 +136,7 @@ end
 function cc.store_starting_sides()
 	-- store starting sides so they can be used to make a faction or army
 	side = {} -- makes a global side table
-	for i = 1, 9 do
+	for i = 1, 1 do
 		-- get the leader for the side
 		local loc = wesnoth.get_starting_location(i)
 		local u = wesnoth.get_unit(loc[1], loc[2])
@@ -195,9 +195,7 @@ function cc.save_globals(side)
 end
 
 function cc.endlevel()
-	wml_actions.endlevel({ result="victory", carryover_report="no",
-		carryover_percentage=0, carryover_add="no", bonus="no",
-		linger_mode="no", save="no", replay_save="no" })
+	wml_actions.endlevel({ result="victory", carryover_report="no", linger_mode="no", replay_save="no" })
 end
 
 function cc.name_sort(e1, e2)
@@ -409,7 +407,7 @@ function cc.mod_faction_display(v)
 	  T.helptip { id = "tooltip_large" },
 	  T.grid { T.row {
 		T.column { T.grid {
-		  T.row { T.column { horizontal_grow = true, T.listbox { id = "the_list",
+		  T.row { T.column { horizontal_grow = true, T.listbox { id = "the_list", vertical_scrollbar_mode = "always",
 			T.header { T.row { T.column { horizontal_alignment = "center", T.label { id = "list_header" } } },
 				T.column { horizontal_alignment = "center", T.spacer { width = 5 } }
 			},
@@ -465,11 +463,12 @@ function cc.mod_faction_display(v)
 			wesnoth.set_dialog_markup(true, "the_list", i, "faction_name")
 			wesnoth.set_dialog_markup(true, "the_list", i, "commander_info")
 		end
-		if v.controller == "human" and v.name == v.__cfg.current_player then
-			wesnoth.set_dialog_value("<big>" .. _"Select your faction for side " .. v.side .. ":" .. "</big>", "list_header")
-		else
-			wesnoth.set_dialog_value("<big>" .. _"Choose a faction for side " .. v.side .. " (" .. v.gold .. " Gold, " .. v.base_income .. " Income)" .. "</big>", "list_header")
-		end
+		wesnoth.set_dialog_value("<big>" .. _"Select your faction for side " .. v.side .. ":" .. "</big>", "list_header")
+		-- if v.controller == "human" and v.name == v.__cfg.current_player then
+			-- wesnoth.set_dialog_value("<big>" .. _"Select your faction for side " .. v.side .. ":" .. "</big>", "list_header")
+		-- else
+			-- wesnoth.set_dialog_value("<big>" .. _"Choose a faction for side " .. v.side .. " (" .. v.gold .. " Gold, " .. v.base_income .. " Income)" .. "</big>", "list_header")
+		-- end
 		wesnoth.set_dialog_markup(true, "list_header")
 		wesnoth.set_dialog_value(1, "the_list")
 		select()
@@ -560,11 +559,11 @@ function cc.mod_army_display()
 	  T.helptip { id = "tooltip_large" },
 	  T.grid { T.row {
 		T.column { T.grid {
-		  T.row { T.column { horizontal_grow = true, T.listbox { id = "the_list",
+		  T.row { T.column { horizontal_grow = true, vertical_grow = true, T.listbox { id = "the_list", vertical_scrollbar_mode = "always",
 			T.header { T.row { T.column { horizontal_alignment = "center", T.label { id = "list_header" } } },
 				T.column { horizontal_alignment = "center", T.spacer { width = 5 } }
 			},
-			T.list_definition { T.row { T.column { horizontal_alignment = "left",
+			T.list_definition { T.row { T.column { grow_factor = 1, horizontal_grow = true, vertical_grow = true, horizontal_alignment = "left",
 			  T.toggle_panel { T.grid { horizontal_alignment = "left", T.row {
 				T.column { horizontal_alignment = "left", T.image { id = "commander_icon" } },
 				T.column { horizontal_alignment = "left",
@@ -813,9 +812,9 @@ function cc.scenario_prestart()
 	
 	-- Make side 1 be human and disable & hide other sides
 	wesnoth.sides[1].controller = "human"
-	for i = 2, 9 do
-		wml_actions.modify_side({ side=i, controller="null", hidden=true })
-	end
+	-- for i = 2, 9 do
+		-- wml_actions.modify_side({ side=i, controller="null", hidden=true })
+	-- end
 
 	cc.load_globals()
 	cc.store_starting_sides()
@@ -824,7 +823,7 @@ function cc.scenario_prestart()
 	wml_actions.modify_turns({ value="-1" })
 	wml_actions.modify_side({ side="1", gold="1000", income="-2" })
 	wml_actions.set_recruit({ side="1", recruit="" })
-	wml_actions.modify_side({ side="1", controller="human", color="red", fog="no", shroud="no" })
+	wml_actions.modify_side({ side="1", controller="human", color="red", fog="no", shroud="no", defeat_condition="never" })
 	wml_actions.objectives({ silent="yes" })
 	
 	-- create the turn refresh event
@@ -868,23 +867,21 @@ function cc.modification_prestart()
 	end
 	sides = nil
 
-	-- disable modification if named player sides > 1
-	-- A named player is a human side that is not a 'Local Player'
-	-- For a named human player name and current_player values of side are identical
-	local named_players = 0
+	-- disable modification if human sides > 1
+	local humans = 0
 	local sides = wesnoth.get_sides()
 	for i,v in ipairs(sides) do
 		if v.controller == "human" and v.name == v.__cfg.current_player then
-			named_players = named_players + 1
+			humans = humans + 1
 		end
 	end
-	if named_players > 1 then
+	if humans > 1 then
 		wml_actions.message({ speaker="narrator", message=_"You must have no more that one named human controlled side to play Custom Campagin." })
 		return cc.endlevel()	
 	elseif humans == 0 then
 		-- player is just watching computer play itself
 	end
-	sides, named_players = nil, nil
+	sides, humans = nil, nil
 	
 	-- disable modification if player hasn't made any armies
 	-- or has chosen to use a faction & doesn't have one
@@ -901,30 +898,30 @@ function cc.modification_prestart()
 	-- For a human 'Local Player' name and current_player values of side are different.
 	-- if the number is greater than zero and player hasn't made a custom faction
 	-- disable the modification.
-	local non_players = 0
-	local sides = wesnoth.get_sides()
-	for i,v in ipairs(sides) do
-		if v.controller == "human" and v.name ~= v.__cfg.current_player then
-			non_players = non_players + 1
-		end
-	end
-	if next(faction) == nil and non_players > 0 then
-		wml_actions.message({ speaker="narrator", message=_"You need at least one faction to play. Create it at the Custom Campaign Map." })
-		return cc.endlevel()
-	end
-	sides, non_players = nil, nil
+	-- local non_players = 0
+	-- local sides = wesnoth.get_sides()
+	-- for i,v in ipairs(sides) do
+		-- if v.controller == "human" and v.name ~= v.__cfg.current_player then
+			-- non_players = non_players + 1
+		-- end
+	-- end
+	-- if next(faction) == nil and non_players > 0 then
+		-- wml_actions.message({ speaker="narrator", message=_"You need at least one faction to play. Create it at the Custom Campaign Map." })
+		-- return cc.endlevel()
+	-- end
+	-- sides, non_players = nil, nil
 		
-	-- Show army menu or faction menu for named human side,
+	-- Show army menu or faction menu for human side,
 	-- present option of faction choice for each unnamed human side ('Local Player'),
 	-- and leave ai and empty sides alone.
 	-- check based on side controller, name & current player values
 	local sides = wesnoth.get_sides()
 	for i,v in ipairs(sides) do
-		if v.controller == "human" and  v.name == v.__cfg.current_player then
+		if v.controller == "human" then -- and  v.name == v.__cfg.current_player then
 			-- kill existing leader to be replaced
 			wml_actions.kill({ side=v.side, canrecruit="yes", animate="no", fire_event="no" })
 			-- load army or faction choice based on option
-			if not wesnoth.get_variable("custom_campaign.use_faction") then
+			if not wesnoth.get_variable("custom_campaign_use_faction") then
 				local t = cc.mod_army_display()
 				local index = t.return_value
 				cc.unpack_entry(army[index], v.side)
@@ -945,12 +942,12 @@ function cc.modification_prestart()
 				local index = t.return_value
 				cc.unpack_entry(faction[index], v.side)
 			end
-		elseif v.controller == "human" and  v.name ~= v.__cfg.current_player then
+		-- elseif v.controller == "human" and  v.name ~= v.__cfg.current_player then
 			-- player wants to use a custom faction for this side.
-			local t = cc.mod_faction_display(v)
-			local index = t.return_value
-			v.controller = "ai"
-			cc.unpack_entry(faction[index], v.side)
+			-- local t = cc.mod_faction_display(v)
+			-- local index = t.return_value
+			-- v.controller = "ai"
+			-- cc.unpack_entry(faction[index], v.side)
 		end
 	end
 
