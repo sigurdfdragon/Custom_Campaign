@@ -101,7 +101,7 @@ function wml_actions.cc_special_unit_sort ( cfg )
 		-- compare value of first element to second element
 		-- in case of tie use language_name of unit to break a tie
 		local function assign_rank ( u )
-			local v = helper.get_child(u, "variables")
+			local v = helper.get_child(u, "variables") or {}
 			if v.cc_role == nil or v.cc_role == ""  then
 				return 6 -- unit is nothing special
 			elseif v.cc_role == "loyal" then
