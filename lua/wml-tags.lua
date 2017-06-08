@@ -7,6 +7,17 @@ local helper = wesnoth.require "lua/helper.lua"
 local wml_actions = wesnoth.wml_actions
 local wml_conditionals = wesnoth.wml_conditionals
 
+function wml_conditionals.cc_current_scenario_is ( cfg )
+	-- [cc_current_scenario_is]
+			-- scenario=required
+	-- [/cc_current_scenario_is]
+	local bool = false
+	if cfg.scenario == wesnoth.game_config.mp_settings.mp_scenario then
+		bool = true
+	end
+	return bool
+end
+
 -- This tag is meant for use inside a [set_menu_item], because it gets the unit at x1,y1
 function wml_conditionals.cc_unit_has_gender_choice ( cfg )
 	-- [cc_unit_has_gender_choice]
