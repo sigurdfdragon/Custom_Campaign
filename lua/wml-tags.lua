@@ -149,7 +149,7 @@ function wml_actions.cc_create_unit ( cfg )
 	-- [/cc_create_unit]
 	local function top_down_left_right(uFirstElem, uSecElem)
 		if uFirstElem.label == uSecElem.label then
-			return uFirstElem.unit_type < uSecElem.unit_type
+			return uFirstElem.description < uSecElem.description
 		end
 		return uFirstElem.label < uSecElem.label
 	end
@@ -157,9 +157,9 @@ function wml_actions.cc_create_unit ( cfg )
 	-- creating the options list is slow, make sure we only do it once
 	-- global cc_create_unit_options initialized in {CC_CREATE_UNIT}
 	if #cc_create_unit_options == 0 then
-		for key,value in pairs(wesnoth.unit_types) do
-			if not value.__cfg.do_not_list then
-				local option = { image = value.__cfg.image, label = value.name, unit_type = key }
+		for k,v in pairs(wesnoth.unit_types) do
+			if not v.__cfg.do_not_list then
+				local option = { image = v.__cfg.image, label = v.__cfg.name, description = v.__cfg.id }
 				table.insert(cc_create_unit_options, option)
 			end
 		end
@@ -174,15 +174,13 @@ function wml_actions.cc_create_unit ( cfg )
 
 	-- make unit
 	local unit = {}
-	unit.type = cc_create_unit_options[i].unit_type
-	unit.x = cfg.x
-	unit.y = cfg.y
+	unit.type = cc_create_unit_options[i].description
 	if cfg.plain_unit == true then
 		unit.generate_name = false
 		unit.random_gender = false
 		unit.random_traits = false
 	end
-	wesnoth.put_unit(unit)
+	wesnoth.put_unit(unit, cfg.x, cfg.y, true)
 end
 
 function wml_actions.cc_scale_unit_experience ( cfg )
