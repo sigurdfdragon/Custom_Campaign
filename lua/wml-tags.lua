@@ -18,6 +18,24 @@ function wml_conditionals.cc_current_scenario_is ( cfg )
 	return bool
 end
 
+-- to check if a specific mod is active
+function wml_conditionals.cc_modification_is_active ( cfg )
+	-- [cc_modification_is_active]
+			-- modification=required
+	-- [/cc_modification_is_active]
+	local utils = wesnoth.require "lua/wml-utils"
+	local bool = false
+	local t = utils.parenthetical_split(wesnoth.game_config.mp_settings.active_mods)
+	-- Remove the specified image from the overlays.
+	for i = #t,1,-1 do
+		if t[i] == cfg.modification then
+			bool = true
+			break
+		end
+	end
+	return bool
+end
+
 -- This tag is meant for use inside a [set_menu_item], because it gets the unit at x1,y1
 function wml_conditionals.cc_unit_has_gender_choice ( cfg )
 	-- [cc_unit_has_gender_choice]
