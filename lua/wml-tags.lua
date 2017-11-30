@@ -175,14 +175,18 @@ function wml_actions.cc_create_unit ( cfg )
 	-- creating the options list is slow, make sure we only do it once
 	-- global cc_create_unit_options initialized in {CC_CREATE_UNIT}
 	if #cc_create_unit_options == 0 then
+		local t = {}
 		for k,v in pairs(wesnoth.unit_types) do
-			if not v.__cfg.do_not_list then
-				local option = { image = v.__cfg.image, label = v.__cfg.name, description = v.__cfg.id }
-				table.insert(cc_create_unit_options, option)
+			local cfg = v.__cfg
+			if not cfg.do_not_list then
+				-- tostring conversion needed for t_strings, otherwise table.sort crashes on large numbers of units
+				local option = { image = cfg.image, label = tostring(cfg.name), description = cfg.id }
+				table.insert(t, option)
 			end
 		end
-		table.sort(cc_create_unit_options, top_down_left_right)
-		table.insert(cc_create_unit_options, 1, { default = true, image = "misc/blank-hex.png", label = _"None", description = _"(Cancel)" })
+		table.sort(t, top_down_left_right)
+		table.insert(t, 1, { default = true, image = "misc/blank-hex.png", label = _"None", description = _"(Cancel)" })
+		cc_create_unit_options = t
 	end
 
 	-- present message
