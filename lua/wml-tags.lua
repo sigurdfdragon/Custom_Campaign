@@ -182,6 +182,7 @@ function wml_actions.cc_create_unit ( cfg )
 			end
 		end
 		table.sort(cc_create_unit_options, top_down_left_right)
+		table.insert(cc_create_unit_options, 1, { default = true, image = "misc/blank-hex.png", label = _"None", description = _"(Cancel)" })
 	end
 
 	-- present message
@@ -191,14 +192,16 @@ function wml_actions.cc_create_unit ( cfg )
 	)
 
 	-- make unit
-	local unit = {}
-	unit.type = cc_create_unit_options[i].description
-	if cfg.plain_unit == true then
-		unit.generate_name = false
-		unit.random_gender = false
-		unit.random_traits = false
+	if i ~= 1 then
+		local unit = {}
+		unit.type = cc_create_unit_options[i].description
+		if cfg.plain_unit == true then
+			unit.generate_name = false
+			unit.random_gender = false
+			unit.random_traits = false
+		end
+		wesnoth.put_unit(unit, cfg.x, cfg.y, true)
 	end
-	wesnoth.put_unit(unit, cfg.x, cfg.y, true)
 end
 
 function wml_actions.cc_scale_unit_experience ( cfg )
