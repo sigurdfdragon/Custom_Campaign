@@ -191,7 +191,7 @@ function wml_actions.cc_create_unit ( cfg )
 
 	-- present message
 	local i = wesnoth.show_message_dialog({
-		message = "Select unit type:",
+		message = "Select unit type: (Detailed unit info can be found in Wesnoth's in-game Help)",
 		}, cc_create_unit_options
 	)
 
