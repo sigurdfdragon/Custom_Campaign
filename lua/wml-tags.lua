@@ -165,40 +165,13 @@ function wml_actions.cc_create_unit ( cfg )
 			-- x,y=required, where to create the new unit
 			-- plain_unit=optional, prevents unit name, traits, & random gender
 	-- [/cc_create_unit]
-	local function top_down_left_right(uFirstElem, uSecElem)
-		if uFirstElem.label == uSecElem.label then
-			return uFirstElem.description < uSecElem.description
-		end
-		return uFirstElem.label < uSecElem.label
-	end
+	-- unit selection code modified from Pick Your Recruits No Preparation Turn Modification by gfgtdf
+	local unit_selection = wesnoth.require "~add-ons/Custom_Campaign/lua/unit_selection.lua"
+	local i, selected_unit = unit_selection.do_selection()
 
-	-- creating the options list is slow, make sure we only do it once
-	-- global cc_create_unit_options initialized in {CC_CREATE_UNIT}
-	if #cc_create_unit_options == 0 then
-		local t = {}
-		for k,v in pairs(wesnoth.unit_types) do
-			local cfg = v.__cfg
-			if not cfg.do_not_list then
-				-- tostring conversion needed for t_strings, otherwise table.sort crashes on large numbers of units
-				local option = { image = cfg.image, label = tostring(cfg.name), description = cfg.id }
-				table.insert(t, option)
-			end
-		end
-		table.sort(t, top_down_left_right)
-		table.insert(t, 1, { default = true, image = "misc/blank-hex.png", label = _"None", description = _"(Cancel)" })
-		cc_create_unit_options = t
-	end
-
-	-- present message
-	local i = wesnoth.show_message_dialog({
-		message = "Select unit type: (Detailed unit info can be found in Wesnoth's in-game Help)",
-		}, cc_create_unit_options
-	)
-
-	-- make unit
-	if i ~= 1 then
+	if i == -1 then
 		local unit = {}
-		unit.type = cc_create_unit_options[i].description
+		unit.type = selected_unit
 		if cfg.plain_unit == true then
 			unit.generate_name = false
 			unit.random_gender = false
