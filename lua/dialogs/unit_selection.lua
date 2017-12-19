@@ -42,6 +42,7 @@ local unit_list = T.listbox {
 				horizontal_grow = true,
 				vertical_grow = true,
 				T.toggle_panel {
+					return_value_id = "ok",
 					T.grid {
 						T.row {
 							grow_factor = 1,
