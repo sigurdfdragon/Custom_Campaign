@@ -50,11 +50,12 @@ function unit_selection.get_biggest_race_size(unit_types)
 	return maxvalue and #maxvalue or 0
 end
 
+cc_create_unit_options = {}
 -- @returns an array of unit id strings.
 function unit_selection.do_selection()
 	local dialogs = wesnoth.require "~add-ons/Custom_Campaign/lua/dialogs/unit_selection.lua"
 	-- creating the unit options list is slow, make sure we only do it once
-	-- global cc_create_unit_options initialized in {CC_CREATE_UNIT}
+	-- global cc_create_unit_options initialized above
 	local unit_types = {}
 	if #cc_create_unit_options == 0 then
 		unit_types = unit_selection.get_unit_types_all()
