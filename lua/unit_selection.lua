@@ -79,14 +79,18 @@ function unit_selection.do_selection()
 		for index2,value in ipairs(unit_types) do
 			if value.race == race_id then
 				wesnoth.set_dialog_value((value.image or "") .."~RC(magenta>red)~SCALE_INTO_SHARP(72,72)", "unit_list", index, "list_image")
-				wesnoth.set_dialog_value((value.name or "") .. "\n" .. (value.cost or "") .. " " .. _"Gold", "unit_list", index, "list_name") -- TODO: themes/gold.png
+				wesnoth.set_dialog_value((value.name or ""), "unit_list", index, "list_name")
+				wesnoth.set_dialog_value("themes/gold.png", "unit_list", index, "list_gold_icon")
+				wesnoth.set_dialog_value((value.cost or ""), "unit_list", index, "list_cost")
 				current_unit_list[index] = index2
 				index = index + 1
 			end
 		end
 		while index <= maxrace_size do
 			wesnoth.set_dialog_value(cc_helper.thex_png , "unit_list", index, "list_image")
-			wesnoth.set_dialog_value(" \n ", "unit_list", index, "list_name")
+			wesnoth.set_dialog_value(" ", "unit_list", index, "list_name")
+			wesnoth.set_dialog_value(cc_helper.thex_png .. "~SCALE(16,16)", "unit_list", index, "list_gold_icon")
+			wesnoth.set_dialog_value(" ", "unit_list", index, "list_cost")
 			index = index + 1
 		end
 	end

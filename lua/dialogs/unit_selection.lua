@@ -56,15 +56,51 @@ local unit_list = T.listbox {
 								}
 							},
 							T.column {
-								border = "all",
-								border_size = 5,
-								horizontal_alignment = "left",
-								GUI_FORCE_WIDGET_MINIMUM_SIZE(150,5,
-									T.label {
-										id = "list_name",
-										linked_group = "cc_lg_name"
+								grow_factor = 1,
+								horizontal_grow = true,
+								T.grid {
+									T.row {
+										T.column {
+											border = "all",
+											border_size = 5,
+											horizontal_alignment = "left",
+											GUI_FORCE_WIDGET_MINIMUM_SIZE(175,5,
+											T.label {
+												id = "list_name",
+												linked_group = "cc_lg_name"
+											}
+											)
+										}
+									},
+									T.row {
+										T.column {
+											horizontal_alignment = "left",
+											T.grid {
+												T.row {
+													grow_factor = 0,
+													T.column {
+														border = "left,bottom",
+														border_size = 5,
+														horizontal_alignment = "left",
+														T.image {
+															id = "list_gold_icon"
+														}
+													},
+													T.column {
+														border = "left,bottom,right",
+														border_size = 5,
+														horizontal_alignment = "left",
+														GUI_FORCE_WIDGET_MINIMUM_SIZE(70,5,
+														T.label {
+															id = "list_cost"
+														}
+														)
+													}
+												}
+											}
+										}
 									}
-								)
+								}
 							}
 						}
 					}
