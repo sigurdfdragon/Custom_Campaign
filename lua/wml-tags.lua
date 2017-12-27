@@ -176,6 +176,8 @@ function wml_actions.cc_create_unit ( cfg )
 			unit.generate_name = false
 			unit.random_gender = false
 			unit.random_traits = false
+		else
+			unit.random_gender = true
 		end
 		wesnoth.put_unit(unit, cfg.x, cfg.y, true)
 	end
