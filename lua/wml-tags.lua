@@ -57,8 +57,11 @@ function wml_conditionals.cc_unit_has_random_names ( cfg )
 	local random_names = false
 	local u = wesnoth.get_unit(cfg.x, cfg.y)
 	local race = wesnoth.races[u.__cfg.race].__cfg
+	local generate_name = wesnoth.unit_types[u.type].__cfg.generate_name
 	if race.male_names or race.female_names then
-		random_names = true
+		if not (generate_name == false) then -- To cover cases like the Direwolf
+			random_names = true
+		end
 	end
 	return random_names
 end
