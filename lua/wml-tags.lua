@@ -23,12 +23,9 @@ function wml_conditionals.cc_modification_is_active ( cfg )
 	-- [cc_modification_is_active]
 			-- modification=required
 	-- [/cc_modification_is_active]
-	local utils = wesnoth.require "lua/wml-utils"
 	local bool = false
-	local t = utils.parenthetical_split(wesnoth.game_config.mp_settings.active_mods)
-	-- Remove the specified image from the overlays.
-	for i = #t,1,-1 do
-		if t[i] == cfg.modification then
+	for i = 1, #wesnoth.scenario.modifications do
+		if wesnoth.scenario.modifications[i].id == cfg.modification then
 			bool = true
 			break
 		end
