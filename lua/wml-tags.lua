@@ -12,7 +12,7 @@ function wml_conditionals.cc_current_scenario_is ( cfg )
 			-- scenario=required
 	-- [/cc_current_scenario_is]
 	local bool = false
-	if cfg.scenario == wesnoth.game_config.mp_settings.mp_scenario then
+	if cfg.scenario == wesnoth.scenario.id then
 		bool = true
 	end
 	return bool
