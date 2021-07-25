@@ -85,14 +85,14 @@ function wml_actions.cc_store_race ( cfg )
 			-- race=(required) the defined ID of the race to store
 			-- variable=the name of the variable into which to store the race information. default 'race'
 	-- [/cc_store_race]
-	wesnoth.set_variable(cfg.variable or "race", wesnoth.races[cfg.race].__cfg)
+	wml.variables[cfg.variable or "race"] = wesnoth.races[cfg.race].__cfg
 end
 
 function wml_actions.cc_store_time ( cfg )
 	-- [cc_store_time]
 			-- variable=the name of the variable into which to store the current system time. default 'time'
 	-- [/cc_store_time]
-	wesnoth.set_variable(cfg.variable or "time", os.date())
+	wml.variables[cfg.variable or "time"] = os.date()
 end
 
 function wml_actions.cc_sort_array ( cfg )
@@ -205,5 +205,5 @@ function wml_actions.cc_scale_unit_experience ( cfg )
 	-- set unit_wml to the correct values
 	unit_wml.experience = adjusted_xp
 	unit_wml.max_experience = u.max_experience
-	wesnoth.set_variable(cfg.name, unit_wml)
+	wml.variables[cfg.name] = unit_wml
 end
