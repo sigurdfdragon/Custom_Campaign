@@ -1,6 +1,5 @@
 -- #textdomain wesnoth-Custom_Campaign
 local _ = wesnoth.textdomain "wesnoth-Custom_Campaign"
-local helper = wesnoth.require("lua/helper.lua")
 local T = wml.tag
 local cc_helper = wesnoth.require "~add-ons/Custom_Campaign/lua/my_helper.lua"
 

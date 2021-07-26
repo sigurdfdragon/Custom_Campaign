@@ -1,8 +1,6 @@
 -- #textdomain wesnoth-Custom_Campaign
 local _ = wesnoth.textdomain "wesnoth-Custom_Campaign"
 
-local helper = wesnoth.require "lua/helper.lua"
-
 -- to make code shorter
 local wml_actions = wesnoth.wml_actions
 local wml_conditionals = wesnoth.wml_conditionals

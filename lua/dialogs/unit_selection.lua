@@ -1,6 +1,5 @@
 -- #textdomain wesnoth-Custom_Campaign
 local _ = wesnoth.textdomain "wesnoth-Custom_Campaign"
-local helper = wesnoth.require("lua/helper.lua")
 local T = wml.tag
 
 local function GUI_FORCE_WIDGET_MINIMUM_SIZE(w,h, content)
