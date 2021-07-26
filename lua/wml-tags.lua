@@ -39,7 +39,7 @@ function wml_conditionals.cc_unit_has_gender_choice ( cfg )
 			-- x,y=required
 	-- [/cc_unit_has_gender_choice]
 	local gender_options = false
-	local u = wesnoth.get_unit(cfg.x, cfg.y)
+	local u = wesnoth.units.get(cfg.x, cfg.y)
 	if wesnoth.unit_types[u.type].__cfg.gender == "male,female" then
 		gender_options = true
 	end
@@ -52,7 +52,7 @@ function wml_conditionals.cc_unit_has_random_names ( cfg )
 			-- x,y=required
 	-- [/cc_unit_has_random_names]
 	local random_names = false
-	local u = wesnoth.get_unit(cfg.x, cfg.y)
+	local u = wesnoth.units.get(cfg.x, cfg.y)
 	local race = wesnoth.races[u.__cfg.race].__cfg
 	local generate_name = wesnoth.unit_types[u.type].__cfg.generate_name
 	if race.male_names or race.female_names then
@@ -68,9 +68,9 @@ function wml_conditionals.cc_unit_has_variations ( cfg )
 	-- [cc_unit_has_variations]
 			-- x,y=required
 	-- [/cc_unit_has_variations]
-	local u = wesnoth.get_unit(cfg.x, cfg.y)
+	local u = wesnoth.units.get(cfg.x, cfg.y)
 	local unit_wml = wesnoth.unit_types[u.type].__cfg
-	return helper.get_child(unit_wml, "variation")
+	return wml.get_child(unit_wml, "variation")
 end
 
 function wml_conditionals.cc_unit_type_is_valid ( cfg )
@@ -101,7 +101,7 @@ function wml_actions.cc_sort_array ( cfg )
 			-- first_key=to sort by
 			-- second_key=to sort by if first key is equal
 	-- [/cc_sort_array]
-	local tArray = helper.get_variable_array(cfg.name)
+	local tArray = wml.array_access.get(cfg.name)
 	local function top_down_left_right(uFirstElem, uSecElem)
 		if uFirstElem[cfg.first_key] == uSecElem[cfg.first_key] then
 			return uFirstElem[cfg.second_key] < uSecElem[cfg.second_key]
@@ -109,7 +109,7 @@ function wml_actions.cc_sort_array ( cfg )
 		return uFirstElem[cfg.first_key] < uSecElem[cfg.first_key]
 	end
 	table.sort(tArray, top_down_left_right)
-	helper.set_variable_array(cfg.name, tArray)
+	wml.array_access.set(cfg.name, tArray)
 end
 
 function wml_actions.cc_special_unit_sort ( cfg )
@@ -123,14 +123,14 @@ function wml_actions.cc_special_unit_sort ( cfg )
 -- like the status table and loading a saved game.
 -- Also, when the Unit List is first opened the units are shown in order of underlying_id
 
-	local tArray = helper.get_variable_array(cfg.name)
+	local tArray = wml.array_access.get(cfg.name)
 
 	local function top_down_left_right(u1, u2)
 		-- assign a value from 1-6 based on unit attributes
 		-- compare value of first element to second element
 		-- in case of tie use language_name of unit to break a tie
 		local function assign_rank ( u )
-			local v = helper.get_child(u, "variables") or {}
+			local v = wml.get_child(u, "variables") or {}
 			if v.cc_role == nil or v.cc_role == ""  then
 				return 6 -- unit is nothing special
 			elseif v.cc_role == "loyal" then
@@ -156,7 +156,7 @@ function wml_actions.cc_special_unit_sort ( cfg )
 	end
 
 	table.sort(tArray, top_down_left_right)
-	helper.set_variable_array(cfg.name, tArray)
+	wml.array_access.set(cfg.name, tArray)
 end
 
 -- This tag is meant for use inside a [set_menu_item], because it gets the unit at x1,y1
@@ -179,7 +179,7 @@ function wml_actions.cc_create_unit ( cfg )
 		else
 			unit.random_gender = true
 		end
-		wesnoth.put_unit(unit, cfg.x, cfg.y, true)
+		wesnoth.units.to_map(unit, cfg.x, cfg.y, true)
 	end
 end
 
@@ -191,13 +191,13 @@ function wml_actions.cc_scale_unit_experience ( cfg )
 	-- scenario to the next. this tag scales the unit's max_experience
 	-- to match the change and adjusts experience to maintain the
 	-- same ratio of experience to max_experience
-	local unit_wml = wesnoth.get_variable(cfg.name)
+	local unit_wml = wml.variables[cfg.name]
 	local xp_ratio = unit_wml.experience / unit_wml.max_experience
 -- find correct max_experience by deleting old value and creating 
 -- a dummy copy of unit to remake the key for the current scenario
 	unit_wml.max_experience = nil
-	local u = wesnoth.create_unit ( unit_wml )
-	local adjusted_xp = helper.round( u.max_experience * xp_ratio )
+	local u = wesnoth.units.create ( unit_wml )
+	local adjusted_xp = mathx.round( u.max_experience * xp_ratio )
 	-- prevent leveling due to rounding
 	if adjusted_xp == u.max_experience then
 		adjusted_xp = adjusted_xp - 1
