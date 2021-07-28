@@ -1,7 +1,7 @@
 -- #textdomain wesnoth-Custom_Campaign
 local _ = wesnoth.textdomain "wesnoth-Custom_Campaign"
 local T = wml.tag
-local cc_helper = wesnoth.require "~add-ons/Custom_Campaign/lua/my_helper.lua"
+local my_helper = wesnoth.require "~add-ons/Custom_Campaign/lua/my_helper.lua"
 
 local unit_selection = {}
 
@@ -42,8 +42,8 @@ function unit_selection.get_unit_races(unit_types)
 end
 
 function unit_selection.get_biggest_race_size(unit_types)
-	local maxkey, maxvalue = cc_helper.tablemax(
-		cc_helper.tablegroupby(unit_types, function(index, ut) return (ut.race or "unknown") end),
+	local maxkey, maxvalue = my_helper.tablemax(
+		my_helper.tablegroupby(unit_types, function(index, ut) return (ut.race or "unknown") end),
 		function(t1,t2) return #t1 < #t2 end
 	)
 	return maxvalue and #maxvalue or 0
@@ -86,9 +86,9 @@ function unit_selection.do_selection()
 			end
 		end
 		while index <= maxrace_size do
-			wesnoth.set_dialog_value(cc_helper.thex_png , "unit_list", index, "list_image")
+			wesnoth.set_dialog_value(my_helper.thex_png , "unit_list", index, "list_image")
 			wesnoth.set_dialog_value(" ", "unit_list", index, "list_name")
-			wesnoth.set_dialog_value(cc_helper.thex_png .. "~SCALE(16,16)", "unit_list", index, "list_gold_icon")
+			wesnoth.set_dialog_value(my_helper.thex_png .. "~SCALE(16,16)", "unit_list", index, "list_gold_icon")
 			wesnoth.set_dialog_value(" ", "unit_list", index, "list_cost")
 			index = index + 1
 		end
