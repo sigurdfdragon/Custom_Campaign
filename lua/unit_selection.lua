@@ -31,7 +31,7 @@ function unit_selection.get_unit_races(unit_types)
 				if race then
 					table.insert(retv, wesnoth.races[value.race or ""].__cfg)
 				else
-					wesnoth.message("Custom Campaign", "found a unit_type with an invalid race '" .. tostring(value.race) .. "'")
+					wesnoth.interface.add_chat_message("Custom Campaign", "found a unit_type with an invalid race '" .. tostring(value.race) .. "'")
 				end
 			end
 		end
@@ -116,7 +116,7 @@ function unit_selection.do_selection()
 		set_unit()
 	end
 
-	local i = wesnoth.show_dialog(dialogs.normal, preshow)
+	local i = gui.show_dialog(dialogs.normal, preshow)
   return i, unit_types[current_selected_unit_index].id
 end
 
