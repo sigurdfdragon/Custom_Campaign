@@ -164,9 +164,7 @@ function wml_actions.cc_create_unit ( cfg )
 			-- plain_unit=optional, prevents unit name, traits, & random gender
 	-- [/cc_create_unit]
 	-- unit selection code modified from Pick Your Recruits No Preparation Turn Modification by gfgtdf
-	local unit_selection = wesnoth.require "~add-ons/Custom_Campaign/lua/unit_selection.lua"
-	local i, selected_unit = unit_selection.do_selection()
-
+	local i, selected_unit = wesnoth.dofile "~add-ons/Custom_Campaign/lua/unit_selection.lua"
 	if i == -1 then
 		local unit = {}
 		unit.type = selected_unit
