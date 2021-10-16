@@ -327,19 +327,27 @@ local function do_selection()
 			current_unit_list = {}
 			for index2,value in ipairs(unit_types) do
 				if value.race == race_id then
-					wesnoth.set_dialog_value((value.image or "") .."~RC(magenta>red)~SCALE_INTO_SHARP(72,72)", "unit_list", index, "list_image")
-					wesnoth.set_dialog_value((value.name or ""), "unit_list", index, "list_name")
-					wesnoth.set_dialog_value("themes/gold.png", "unit_list", index, "list_gold_icon")
-					wesnoth.set_dialog_value((value.cost or ""), "unit_list", index, "list_cost")
+					local widget = dialog:find("unit_list", index, "list_image")
+					widget.label = (value.image or "") .."~RC(magenta>red)~SCALE_INTO_SHARP(72,72)"
+					widget = dialog:find("unit_list", index, "list_name")
+					widget.label = value.name or ""
+					widget = dialog:find("unit_list", index, "list_gold_icon")
+					widget.label = "themes/gold.png"
+					widget = dialog:find("unit_list", index, "list_cost")
+					widget.label = value.cost or ""
 					current_unit_list[index] = index2
 					index = index + 1
 				end
 			end
 			while index <= maxrace_size do
-				wesnoth.set_dialog_value(my_helper.thex_png , "unit_list", index, "list_image")
-				wesnoth.set_dialog_value(" ", "unit_list", index, "list_name")
-				wesnoth.set_dialog_value(my_helper.thex_png .. "~SCALE(16,16)", "unit_list", index, "list_gold_icon")
-				wesnoth.set_dialog_value(" ", "unit_list", index, "list_cost")
+				local widget = dialog:find("unit_list", index, "list_image")
+				widget.label = my_helper.thex_png
+				widget = dialog:find("unit_list", index, "list_name")
+				widget.label = " "
+				widget = dialog:find("unit_list", index, "list_gold_icon")
+				widget.label = my_helper.thex_png .. "~SCALE(16,16)"
+				widget = dialog:find("unit_list", index, "list_cost")
+				widget.label = " "
 				index = index + 1
 			end
 		end
