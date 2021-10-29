@@ -256,7 +256,7 @@ local function do_selection()
 
 
 	local dialog = {
-		maximum_height = 700,
+		maximum_height = 730,
 		maximum_width = 900,
 
 		T.helptip { id = "tooltip" }, -- mandatory field
