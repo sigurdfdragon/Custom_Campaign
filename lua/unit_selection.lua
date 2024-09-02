@@ -367,9 +367,20 @@ local function do_selection()
 		dialog.unit_list.on_modified = set_unit
 		set_race()
 		set_unit()
+		-- having set_race & unit twice in this sequence might not be best,
+		-- but it works for the select unit dialog to remember what the player chose.
+		dialog.race_list.selected_index = wml.variables["dialog_race_index"] or 1
+		dialog.unit_list.selected_index = wml.variables["dialog_unit_index"] or 1
+		set_race()
+		set_unit()
 	end
 
-	local i = gui.show_dialog(dialog, preshow)
+	local function postshow (dialog)
+		wml.variables["dialog_race_index"] = dialog.race_list.selected_index
+		wml.variables["dialog_unit_index"] = dialog.unit_list.selected_index
+	end
+
+	local i = gui.show_dialog(dialog, preshow, postshow)
   return i, unit_types[current_selected_unit_index].id
 end
 
